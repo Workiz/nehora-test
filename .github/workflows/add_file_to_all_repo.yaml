@@ -1,8 +1,8 @@
 name: Global workflow to rule them all
 
 on:
-  push:
-    branches: [ workiz.com ] #or main
+  # push:
+  #   branches: [ workiz.com ] #or main
   workflow_dispatch: {} #to enable manual triggering of the action
 
 jobs:
