@@ -16,7 +16,7 @@ jobs:
     - name: upload files  
       uses: ./tmp/workiz-actions/upload-files-to-bucket
       with:
-        FILES_PATH: '[./test.txt,htd]'
+        FILES_PATH: 'test.txt,test1.txt'
         BUCKET_PATH: 'gs://test/'
         GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
         ALTER_SA_GITHUB_ACTIONS_JSON_KEY: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
