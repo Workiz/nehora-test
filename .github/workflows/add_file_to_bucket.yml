@@ -19,5 +19,5 @@ jobs:
       uses: ./tmp/workiz-actions/upload-files-to-bucket
       with:
         FILES_PATH: './test.txt,./test1.txt'
-        BUCKET_PATH: 'gs://nehora-test/'
+        BUCKET_NAME: 'nehora-test'
         ALTER_SA_GITHUB_ACTIONS_JSON_KEY: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
