@@ -18,6 +18,6 @@ jobs:
     - name: upload files  
       uses: ./tmp/workiz-actions/upload-files-to-bucket
       with:
-        FILES_PATH: './repo,test,txt'
+        FILES_PATH: './repo,./test.txt'
         BUCKET_NAME: 'nehora-test'
         ALTER_SA_GITHUB_ACTIONS_JSON_KEY: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
