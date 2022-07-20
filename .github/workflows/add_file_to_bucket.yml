@@ -12,9 +12,9 @@ jobs:
         repository: Workiz/workiz-actions
         ref: DEVOPS-415-workiz-actions-create-action-to-upload-files-to-bucket
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
+        path: .github
     - name: upload files  
-      uses: ./tmp/workiz-actions/upload-files-to-bucket
+      uses: .github/upload-files-to-bucket
       with:
         FILES_PATH: './test.txt,./test1.txt'
         BUCKET_PATH: 'gs://test/'
