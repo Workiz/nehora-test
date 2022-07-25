@@ -50,7 +50,7 @@ jobs:
         message: |
           :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title or branch name** &nbsp;&nbsp;&nbsp; :suspect:
         allow-repeats: true
-    - name: valid pr and branch name
+    - name: valid pr or branch name
       uses: mshick/add-pr-comment@v1
       if: ${{ env.PR_STATUS_CODE==200 || env.BRANCH_STATUS_CODE==200 }}
       env:
