@@ -29,14 +29,14 @@ jobs:
           
           PR_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
-          -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
+          -H "Authorization: Basic ${{secrets.JIRA_TOKEN}}" \
           -H "Content-Type: application/json" \
           "https://workiz.atlassian.net/rest/api/2/issue/$PR_TITEL")
           echo "PR_STATUS_CODE=$PR_STATUS_CODE" >> $GITHUB_ENV
 
           BRANCH_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
-          -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
+          -H "Authorization: Basic ${{secrets.JIRA_TOKEN}}" \
           -H "Content-Type: application/json" \
           "https://workiz.atlassian.net/rest/api/2/issue/$BRANCH_TITEL")
           echo "BRANCH_STATUS_CODE=$BRANCH_STATUS_CODE" >> $GITHUB_ENV
