@@ -14,9 +14,16 @@ jobs:
       uses: actions/checkout@v3
     - name: check pr titel
       run: |
-          IFS='[' read -ra ADDR <<< "${{ github.event.pull_request.title }}"
-          IFS=']' read -ra ISSUE_NAME <<< "${ADDR[0]}"
-          echo "${ISSUE_NAME[0]}"
+          # regex='[(.*)]-(.*)'
+          # while IFS= read -r line; do
+          #   if [[ $line =~ $regex ]] ; then
+          #       srcfile="${BASH_REMATCH[1]}"
+          #       dest="${BASH_REMATCH[2]}"
+          #   fi
+          # done 
+          echo ${{ github.event.pull_request.title }}
+          echo ${{ github.event.pull_request}}
+
           STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
           -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
