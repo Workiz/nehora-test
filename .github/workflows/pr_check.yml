@@ -3,62 +3,21 @@ on:
   pull_request:
     types: [opened, edited, reopened]
 
-env:
-  PR_STATUS_CODE: 200
-  BRANCH_STATUS_CODE: 200
-
 jobs:
-  pr-lint_new:
+  test:
+    name: check pr
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: check pr
-      run: |
-
-          PR_TITEL=${{ github.event.pull_request.title }}
-          BRANCH_TITEL=${{github.head_ref}}
-
-          if [[ "$PR_TITEL" =~ \[(.*)\](.*) ]]; then
-            PR_TITEL=${BASH_REMATCH[1]}
-          fi
-
-          if [[ "$BRANCH_TITEL" =~ ([A-Za-z]+-[1-9]+).* ]]; then
-            BRANCH_TITEL=${BASH_REMATCH[1]}
-          fi
-          
-          PR_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
-          -X GET \
-          -H "Authorization: Basic ${{secrets.JIRA_TOKEN}}" \
-          -H "Content-Type: application/json" \
-          "https://workiz.atlassian.net/rest/api/2/issue/$PR_TITEL")
-          echo "PR_STATUS_CODE=$PR_STATUS_CODE" >> $GITHUB_ENV
-
-          BRANCH_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
-          -X GET \
-          -H "Authorization: Basic ${{secrets.JIRA_TOKEN}}" \
-          -H "Content-Type: application/json" \
-          "https://workiz.atlassian.net/rest/api/2/issue/$BRANCH_TITEL")
-          echo "BRANCH_STATUS_CODE=$BRANCH_STATUS_CODE" >> $GITHUB_ENV
-
-    - name: invalid pr and branch name
-      uses: mshick/add-pr-comment@v1
-      if: ${{ env.PR_STATUS_CODE==404 && env.BRANCH_STATUS_CODE==404 }}
-      env:
-        GITHUB_TOKEN: ${{github.token}}
+    - name: Check out repository
+      uses: actions/checkout@v3
       with:
-        message: |
-          :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title or branch name** &nbsp;&nbsp;&nbsp; :suspect:
-        allow-repeats: true
-    - name: valid pr or branch name
-      uses: mshick/add-pr-comment@v1
-      if: ${{ env.PR_STATUS_CODE==200 || env.BRANCH_STATUS_CODE==200 }}
-      env:
-        GITHUB_TOKEN: ${{github.token}}
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-399-jira-better-pr-lint-action
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: upload files  
+      uses: ./tmp/workiz-actions/pr-lint
       with:
-        message: |
-          **Great job!**
-        allow-repeats: true
-    - name: exit_code
-      if: ${{ env.PR_STATUS_CODE==404 && env.BRANCH_STATUS_CODE==404 }}
-      run: exit 1
+        JIRA_TOKEN: ${{secrets.JIRA_TOKEN}}
