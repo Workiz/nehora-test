@@ -23,6 +23,8 @@ jobs:
     name: check pr
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: Check out repository
       uses: actions/checkout@v3
       with:
