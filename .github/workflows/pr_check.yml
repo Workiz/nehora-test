@@ -47,6 +47,7 @@ jobs:
           "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
           echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
           # STATUS_CODE=0;
+          echo ${{env.STATUS_CODE}}
     - name: Comment PR
       if: ${{env.STATUS_CODE}} > 200
       uses: thollander/actions-comment-pull-request@v1
