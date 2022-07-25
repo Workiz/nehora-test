@@ -38,12 +38,12 @@ jobs:
     steps:
     - name: check pr titel
       run: |
-          STATUS_CODE=curl -s -o /dev/null -w "%{http_code}"  \
+          curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
           -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
           -H "Content-Type: application/json" \
           "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
-          echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
+          # echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
           # STATUS_CODE=0;
 
     - uses: mshick/add-pr-comment@v1
