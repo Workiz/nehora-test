@@ -16,7 +16,8 @@ jobs:
     - name: check pr titel
       run: |
 
-          if [[ ${{ github.event.pull_request.title }} =~ \[(.*)\](.*) ]]; then
+          if [[ "${{ github.event.pull_request.title }}" =~ \[(.*)\](.*) ]]; then
+            echo "in"
             TITEL=${BASH_REMATCH[1]}
             echo "TITEL=$TITEL" >> $GITHUB_ENV
           fi
