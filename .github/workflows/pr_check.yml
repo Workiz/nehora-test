@@ -15,10 +15,8 @@ jobs:
     - name: check pr titel
       run: |
           IFS='[' read -ra ADDR <<< "${{ github.event.pull_request.title }}"
-          for i in "${ADDR[@]}"; do
-            echo "$i"
-          done
-          echo "${ADDR[0]}"
+          IFS=']' read -ra ISSUE_NAME <<< "${ADDR[0]}"
+          echo "${ISSUE_NAME[0]}"
           STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
           -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
