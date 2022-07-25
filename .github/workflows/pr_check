@@ -1,0 +1,61 @@
+name: PR Lint New
+
+# on:
+#   pull_request:
+#     # By default, a workflow only runs when a pull_request's activity type is opened, synchronize, or reopened. We
+#     # explicity override here so that PR titles are re-linted when the PR text content is edited.
+#     #
+#     # Possible values: https://help.github.com/en/actions/reference/events-that-trigger-workflows#pull-request-event-pull_request
+#     types: [opened, edited, reopened]
+
+# jobs:
+#   pr-lint_new:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: morrisoncole/pr-lint-action@v1.6.1
+#         with:
+#           title-regex: "(RN||FIN||ARCH||DEVOPS||WOR||WCS||API||COM||NT||CNS||GROW||CORE||rn||fin||arch||devops||wor||wcs||api||com||nt||cns||grow||core||Rn||Fin||Arch||DevOps||Wor||Wcs||Api||Com||Nt||Cns||Grow||Core)-[0-9]+"
+#           on-failed-regex-fail-action: true
+#           on-failed-regex-request-changes: false
+#           on-failed-regex-create-review: true
+#           on-failed-regex-comment:
+#             ":x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:"
+#           on-succeeded-regex-dismiss-review-comment:
+#             "Great job!"
+#           repo-token: "${{ secrets.GH_TOKEN_MARKIZ_BOT }}"
+
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+env:
+  STATUS_CODE: 200
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: check pr titel
+      run: |
+         STATUS_CODE = curl -s -o /dev/null -w "%{http_code}"  \
+          -X GET \
+          -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
+          -H "Content-Type: application/json" \
+          "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
+          echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
+
+    - uses: mshick/add-pr-comment@v1
+      if: ${{env.STATUS_CODE}} > 200
+      with:
+        message: |
+          :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:
+        repo-token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        allow-repeats: false # This is the default
+    - uses: mshick/add-pr-comment@v1
+      if: ${{env.STATUS_CODE}} <= 200
+      with:
+        message: |
+          "Great job!"
+        repo-token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        allow-repeats: false # This is the default
+      
