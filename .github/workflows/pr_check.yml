@@ -45,6 +45,11 @@ jobs:
           "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
           # echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
           # STATUS_CODE=0;
+          curl \
+          -X GET \
+          -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
+          -H "Content-Type: application/json" \
+          "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
 
     - uses: mshick/add-pr-comment@v1
       if: ${{env.STATUS_CODE}} > 200
