@@ -8,7 +8,7 @@ env:
   BRANCH_STATUS_CODE: 200
 
 jobs:
-  test:
+  pr-lint_new:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
