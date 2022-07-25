@@ -6,8 +6,6 @@ on:
 env:
   PR_STATUS_CODE: 200
   BRANCH_STATUS_CODE: 200
-  PR_TITEL: ${{ github.event.pull_request.title }}
-  BRANCH_TITEL: ${{github.head_ref}}
 
 jobs:
   test:
@@ -17,14 +15,16 @@ jobs:
       uses: actions/checkout@v3
     - name: check pr
       run: |
+
+          PR_TITEL=${{ github.event.pull_request.title }}
+          BRANCH_TITEL=${{github.head_ref}}
+
           if [[ "$PR_TITEL" =~ \[(.*)\](.*) ]]; then
             PR_TITEL=${BASH_REMATCH[1]}
-            # echo "PR_TITEL=$PR_TITEL" >> $GITHUB_ENV
           fi
 
           if [[ "$BRANCH_TITEL" =~ ([A-Za-z]+-[1-9]+).* ]]; then
             BRANCH_TITEL=${BASH_REMATCH[1]}
-            # echo "BRANCH_TITEL=$BRANCH_TITEL" >> $GITHUB_ENV
           fi
           
           PR_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
