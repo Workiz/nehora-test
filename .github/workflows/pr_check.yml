@@ -15,19 +15,18 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: check pr PR_TITEL
+    - name: check pr
       run: |
-          if [[ "${{ github.event.pull_request.title }}" =~ \[(.*)\](.*) ]]; then
+          if [[ "$PR_TITEL" =~ \[(.*)\](.*) ]]; then
             PR_TITEL=${BASH_REMATCH[1]}
             echo "PR_TITEL=$PR_TITEL" >> $GITHUB_ENV
           fi
 
-          if [[ "${{github.head_ref}}" =~ ([A-Za-z]+-[1-9]+).* ]]; then
+          if [[ "$BRANCH_TITEL" =~ ([A-Za-z]+-[1-9]+).* ]]; then
             BRANCH_TITEL=${BASH_REMATCH[1]}
             echo "BRANCH_TITEL=$BRANCH_TITEL" >> $GITHUB_ENV
           fi
           
-
           PR_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
           -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
@@ -42,9 +41,6 @@ jobs:
           "https://workiz.atlassian.net/rest/api/2/issue/$BRANCH_TITEL")
           echo "BRANCH_STATUS_CODE=$BRANCH_STATUS_CODE" >> $GITHUB_ENV
 
-          echo $BRANCH_TITEL
-          echo $BRANCH_STATUS_CODE
-          echo $PR_STATUS_CODE
     - name: invalid pr and branch name
       uses: mshick/add-pr-comment@v1
       if: ${{ env.PR_STATUS_CODE==404 && env.BRANCH_STATUS_CODE==404 }}
@@ -52,7 +48,7 @@ jobs:
         GITHUB_TOKEN: ${{github.token}}
       with:
         message: |
-          :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:
+          :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title or branch name** &nbsp;&nbsp;&nbsp; :suspect:
         allow-repeats: true
     - name: valid pr and branch name
       uses: mshick/add-pr-comment@v1
