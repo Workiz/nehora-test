@@ -48,9 +48,16 @@ jobs:
           echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
           # STATUS_CODE=0;
           echo ${{env.STATUS_CODE}}
-          return STATUS_CODE-200
     - uses: mshick/add-pr-comment@v1
-      if: failure()
+      if: ${{env.STATUS_CODE}}==404
+      env:
+        GITHUB_TOKEN: ${{github.token}}
+      with:
+        message: |
+          error
+        allow-repeats: true
+    - uses: mshick/add-pr-comment@v1
+      if: ${{env.STATUS_CODE}}==200
       env:
         GITHUB_TOKEN: ${{github.token}}
       with:
