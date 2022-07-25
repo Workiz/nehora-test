@@ -38,7 +38,7 @@ jobs:
     steps:
     - name: check pr titel
       run: |
-          STATUS_CODE = curl -s -o /dev/null -w "%{http_code}"  \
+          STATUS_CODE=curl -s -o /dev/null -w "%{http_code}"  \
           -X GET \
           -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
           -H "Content-Type: application/json" \
