@@ -55,6 +55,7 @@ jobs:
         message: |
           :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:
         allow-repeats: true
+        run: exit ${{ env.STATUS_CODE}}-200
     - uses: mshick/add-pr-comment@v1
       if: ${{ env.STATUS_CODE==200 }}
       env:
@@ -63,5 +64,6 @@ jobs:
         message: |
           "Great job!"
         allow-repeats: true
-    - name: exit_code
-      run: exit ${{ env.STATUS_CODE}}-200
+        run: exit ${{ env.STATUS_CODE}}-200
+    # - name: exit_code
+    #   run: exit ${{ env.STATUS_CODE}}-200
