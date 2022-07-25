@@ -41,6 +41,9 @@ jobs:
           -H "Content-Type: application/json" \
           "https://workiz.atlassian.net/rest/api/2/issue/$BRANCH_TITEL")
           echo "BRANCH_STATUS_CODE=$BRANCH_STATUS_CODE" >> $GITHUB_ENV
+
+          echo $BRANCH_STATUS_CODE
+          echo $PR_STATUS_CODE
     - name: invalid pr and branch name
       uses: mshick/add-pr-comment@v1
       if: ${{ env.PR_STATUS_CODE==404 && env.BRANCH_STATUS_CODE==404 }}
