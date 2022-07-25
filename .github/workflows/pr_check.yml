@@ -37,4 +37,5 @@ jobs:
           "Great job!"
         allow-repeats: true
     - name: exit_code
-      run: exit ${{ env.STATUS_CODE-200}}
+      if: ${{ env.STATUS_CODE==404 }}
+      run: exit 1
