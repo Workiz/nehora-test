@@ -17,7 +17,7 @@ jobs:
         ref: DEVOPS-399-jira-better-pr-lint-action
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: upload files  
+    - name: pr lint  
       uses: ./tmp/workiz-actions/pr-lint
       with:
         JIRA_TOKEN: ${{secrets.JIRA_TOKEN}}
