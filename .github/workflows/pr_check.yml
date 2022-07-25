@@ -36,6 +36,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: check pr titel
       run: |
           curl -s -o /dev/null -w "%{http_code}"  \
@@ -45,24 +47,24 @@ jobs:
           "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
           # echo "STATUS_CODE=$STATUS_CODE" >> $GITHUB_ENV
           # STATUS_CODE=0;
-          curl \
-          -X GET \
-          -H "Authorization: Basic bmVob3JhLm1vc2hlQHdvcmtpei5jb206cGNCS0dCSXhhMG1SbjRmN2FRTWtCMUM5" \
-          -H "Content-Type: application/json" \
-          "https://workiz.atlassian.net/rest/api/2/issue/${{ github.event.pull_request.title }}"
-
-    - uses: mshick/add-pr-comment@v1
-      if: ${{env.STATUS_CODE}} > 200
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v1
       with:
         message: |
-          :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:
-        repo-token: "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"
-        allow-repeats: false # This is the default
-    - uses: mshick/add-pr-comment@v1
-      if: ${{env.STATUS_CODE}} == 200
-      with:
-        message: |
-          "Great job!"
-        repo-token: "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"
-        allow-repeats: false # This is the default
+          Hello world ! :wave:
+        GITHUB_TOKEN: "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"
+    # - uses: mshick/add-pr-comment@v1
+    #   if: ${{env.STATUS_CODE}} > 200
+    #   with:
+    #     message: |
+    #       :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:
+    #     repo-token: "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"
+    #     allow-repeats: false # This is the default
+    # - uses: mshick/add-pr-comment@v1
+    #   if: ${{env.STATUS_CODE}} == 200
+    #   with:
+    #     message: |
+    #       "Great job!"
+    #     repo-token: "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"
+    #     allow-repeats: false # This is the default
       
