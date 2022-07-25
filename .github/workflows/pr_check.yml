@@ -64,18 +64,6 @@ jobs:
         message: |
           **Hello MASTER**
         allow-repeats: true
-    # - uses: mshick/add-pr-comment@v1
-    #   if: ${{env.STATUS_CODE}} > 200
-    #   with:
-    #     message: |
-    #       :x: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Jira ticket ID was not found at PR title** &nbsp;&nbsp;&nbsp; :suspect:
-    #     repo-token: "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"
-    #     allow-repeats: false # This is the default
-    # - uses: mshick/add-pr-comment@v1
-    #   if: ${{env.STATUS_CODE}} == 200
-    #   with:
-    #     message: |
-    #       "Great job!"
-    #     repo-token: "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"
-    #     allow-repeats: false # This is the default
-      
+    - name: echo 
+      run: | 
+        echo ${{ env.STATUS_CODE}}
