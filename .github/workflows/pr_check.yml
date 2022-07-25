@@ -42,6 +42,7 @@ jobs:
           "https://workiz.atlassian.net/rest/api/2/issue/$BRANCH_TITEL")
           echo "BRANCH_STATUS_CODE=$BRANCH_STATUS_CODE" >> $GITHUB_ENV
 
+          echo $BRANCH_TITEL
           echo $BRANCH_STATUS_CODE
           echo $PR_STATUS_CODE
     - name: invalid pr and branch name
