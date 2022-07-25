@@ -19,12 +19,12 @@ jobs:
       run: |
           if [[ "$PR_TITEL" =~ \[(.*)\](.*) ]]; then
             PR_TITEL=${BASH_REMATCH[1]}
-            echo "PR_TITEL=$PR_TITEL" >> $GITHUB_ENV
+            # echo "PR_TITEL=$PR_TITEL" >> $GITHUB_ENV
           fi
 
           if [[ "$BRANCH_TITEL" =~ ([A-Za-z]+-[1-9]+).* ]]; then
             BRANCH_TITEL=${BASH_REMATCH[1]}
-            echo "BRANCH_TITEL=$BRANCH_TITEL" >> $GITHUB_ENV
+            # echo "BRANCH_TITEL=$BRANCH_TITEL" >> $GITHUB_ENV
           fi
           
           PR_STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}"  \
