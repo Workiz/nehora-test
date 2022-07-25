@@ -53,6 +53,13 @@ jobs:
         message: |
           Hello world ! :wave:
         GITHUB_TOKEN: "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"
+    - uses: mshick/add-pr-comment@v1
+      env:
+        GITHUB_TOKEN: "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"
+      with:
+        message: |
+          **Hello MASTER**
+        allow-repeats: true
     # - uses: mshick/add-pr-comment@v1
     #   if: ${{env.STATUS_CODE}} > 200
     #   with:
