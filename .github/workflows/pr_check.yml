@@ -22,7 +22,7 @@ jobs:
             echo "PR_TITEL=$PR_TITEL" >> $GITHUB_ENV
           fi
 
-          if [[ "${{github.head_ref}}" =~ ([A-Z]+-[1-9]+).* ]]; then
+          if [[ "${{github.head_ref}}" =~ ([A-Za-z]+-[1-9]+).* ]]; then
             BRANCH_TITEL=${BASH_REMATCH[1]}
             echo "BRANCH_TITEL=$BRANCH_TITEL" >> $GITHUB_ENV
           fi
