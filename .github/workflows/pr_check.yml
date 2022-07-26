@@ -1,0 +1,21 @@
+name: PR Lint New
+on:
+  pull_request:
+    types: [opened, edited, reopened]
+
+jobs:
+  test:
+    name: check pr
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-399-jira-better-pr-lint-action
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: pr lint  
+      uses: ./tmp/workiz-actions/pr-lint
+      with:
+        JIRA_TOKEN: ${{secrets.JIRA_TOKEN}}
