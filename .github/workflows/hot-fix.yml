@@ -25,3 +25,5 @@ jobs:
       uses: ./tmp/workiz-actions/hot-fix
       env:
         TAG_TYPE: ${{ inputs.TAG_TYPE }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
