@@ -1,0 +1,27 @@
+name: hot fix
+on:
+  workflow_dispatch:
+    inputs:
+      TAG_TYPE:
+        description: 'TAG_TYPE (v or rc) '
+        required: true
+
+jobs:
+  hot-fix:
+    name: hot-fix
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Check out repository
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-423-workiz-actions-create-action-to-hf
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+        fetch-depth: '0'
+    - name: hot-fix  
+      uses: ./tmp/workiz-actions/hot-fix
+      env:
+        TAG_TYPE: ${{ inputs.TAG_TYPE }}
