@@ -18,7 +18,6 @@ on:
 #         # PRERELEASE_SUFFIX: 'alpha'
 #         # INITIAL_VERSION: '1.0.0'
 
-
 jobs:
   create-tag:
     name: create-tag
