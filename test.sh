@@ -6,8 +6,9 @@
 #     src=${BASH_REMATCH[1]}
 #     echo $src
 # fi
-current_branch=h3.310-hf2-branch
+current_branch=v3.310-hf2-branch
 
-if [[ "$current_branch" =~ v.*-hf.*-branch ]]; then
+if [[ "$current_branch" =~ ^(v.*-hf.*)-branch$ ]]; then
+  echo "${BASH_REMATCH[1]}"
     echo "here"
 fi
