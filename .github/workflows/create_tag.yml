@@ -20,4 +20,4 @@ jobs:
     - name: create-tag  
       uses: ./tmp/workiz-actions/create-tag
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
