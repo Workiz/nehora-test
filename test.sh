@@ -6,8 +6,8 @@
 #     src=${BASH_REMATCH[1]}
 #     echo $src
 # fi
+current_branch=h3.310-hf2-branch
 
-if [[ "${{github.head_ref}}" =~ ([A-Z]+-[1-9]+).* ]]; then
-            BRANCH_TITEL=${BASH_REMATCH[1]}
-            echo $BRANCH_TITEL
-          fi
+if [[ "$current_branch" =~ v.*-hf.*-branch ]]; then
+    echo "here"
+fi
