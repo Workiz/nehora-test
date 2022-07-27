@@ -2,9 +2,16 @@ name: hot fix
 on:
   workflow_dispatch:
     inputs:
+      # TAG_TYPE:
+      #   description: 'TAG_TYPE (v or rc) '
+      #   required: true
       TAG_TYPE:
-        description: 'TAG_TYPE (v or rc) '
+        type: choice
+        description: TAG_TYPE (v or rc)
         required: true
+        options: 
+        - v
+        - rc
 
 jobs:
   hot-fix:
