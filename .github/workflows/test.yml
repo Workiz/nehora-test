@@ -1,0 +1,56 @@
+name: Build rc from tag
+
+on:      
+  workflow_dispatch:
+    inputs:
+      manual_tag:
+        description: 'Enter tag.'     
+        required: false
+env:
+  GCP_REGION: us-central1
+  GCP_ZONE: us-central1-b
+  GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
+  MANUAL_TAG: ${{github.event.inputs.manual_tag}}
+  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
+  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
+  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
+
+jobs:
+
+  db-migrate:
+    name: db migrate RC MySQL
+    runs-on: ubuntu-latest
+    steps:
+      - name: test
+        run: echo "db-migrate"
+
+  create-rc:
+    name: create-rc
+    runs-on: ubuntu-latest
+    steps:
+      - name: test
+        run: enfdkl
+
+  send-slack-msg:
+    needs: [create-rc,db-migrate]
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Send success slack msg 
+      if: success() 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: '*qa.workiz.com got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: \n *RC got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: '
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
