@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: test
-        run: enfdkl
+        run: echo "hi"
 
   send-slack-msg:
     needs: [create-rc,db-migrate]
