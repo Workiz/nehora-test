@@ -21,12 +21,12 @@ jobs:
         last_tag="${last_tag:1}"
         echo "$last_tag"
         IFS='.' read -ra tag_parts <<< "$last_tag"
-        part2=`expr ${tag_parts[1]} + 1`
+        part2=`expr ${tag_parts[1]} + 2`
         new_tag="${tag_parts[0]}.$part2"
         echo "new tag $new_tag"
         branch="rc$new_tag-branch"
         echo "branch $branch"
-        git checkout "$branch"
+        git checkout -b "$branch"
         git pull origin workiz.com
         git push --set-upstream origin "$branch" 
         echo "{BACKEND_BRANCH}={$branch}" >> $GITHUB_ENV
