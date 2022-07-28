@@ -110,7 +110,7 @@ jobs:
           LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'    
   create-rc:
     needs: [create-rc-branch]
-    name: create RC from tag.
+    name: create RC from branch
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
