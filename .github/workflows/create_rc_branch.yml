@@ -6,12 +6,15 @@ env:
   BACKEND_BRANCH: ${{ github.ref_name }}
 jobs:
   create-rc-branch:
+    outputs: 
+      BACKEND_BRANCH: ${{ steps.create-rc-branch.outputs.BACKEND_BRANCH }}
     name: create-rc-branch
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: create rc branch
+      id: create-rc-branch
       if: ${{ github.ref_name }} == "workiz.com"
       run: | 
         echo ${{env.BACKEND_BRANCH}}
@@ -29,8 +32,8 @@ jobs:
         # git checkout -b "$BACKEND_BRANCH"
         # git pull origin workiz.com
         # git push --set-upstream origin "$BACKEND_BRANCH" 
-        echo "BACKEND_BRANCH=$BACKEND_BRANCH" >> $GITHUB_ENV
-        echo ${{env.BACKEND_BRANCH}}
+        echo "::set-output name=BACKEND_BRANCH::$BACKEND_BRANCH"
+     
   build-rc-env:
     needs: [create-rc-branch]
     name: build-rc-env
@@ -45,5 +48,5 @@ jobs:
     - name: Create new environment
       if: success()
       run: | 
-        echo ${{env.BACKEND_BRANCH}}
+        echo ${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}
         # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/new_staging_env/create_new_env.sh '${FRONTEND_BRANCH}' '${BACKEND_BRANCH}' '${USER_NAME}' '${CREATE_FRONTEND}' '${TEMP_ENV}' " --project=$GKE_CORE_PROJECT
