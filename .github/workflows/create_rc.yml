@@ -1,0 +1,201 @@
+name: Create rc branch
+on:
+  workflow_dispatch:
+
+env: 
+  BACKEND_BRANCH: ${{ github.ref_name }}
+  GCP_REGION: us-central1
+  GCP_ZONE: us-central1-b
+  GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+  MANUAL_TAG: ${{github.event.inputs.manual_tag}}
+  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
+  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
+  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
+
+jobs:
+  create-rc-branch:
+    outputs: 
+      BACKEND_BRANCH: ${{ steps.create-rc-branch.outputs.BACKEND_BRANCH }}
+    name: create-rc-branch
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: create rc branch
+      id: create-rc-branch
+      if: ${{ github.ref_name }} == "workiz.com"
+      run: | 
+        echo ${{env.BACKEND_BRANCH}}
+        git config --global --add safe.directory /github/workspace
+        git fetch --tags
+        last_tag=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1)  
+        last_tag="${last_tag:1}"
+        echo "$last_tag"
+        IFS='.' read -ra tag_parts <<< "$last_tag"
+        part2=`expr ${tag_parts[1]} + 1`
+        new_tag="${tag_parts[0]}.$part2"
+        echo "new tag $new_tag"
+        BACKEND_BRANCH="rc$new_tag-branch"
+        echo "BACKEND_BRANCH $BACKEND_BRANCH"
+        git checkout -b "$BACKEND_BRANCH"
+        git pull origin workiz.com
+        git push --set-upstream origin "$BACKEND_BRANCH" 
+        echo "::set-output name=BACKEND_BRANCH::$BACKEND_BRANCH"
+
+        workiz_actions_commit_sha=$(curl -X GET "https://api.github.com/repos/Workiz/workiz-actions/commits?per_page=1"  -H "Accept: application/vnd.github+json"    -H "Authorization: token $GITHUB_TOKEN  " | jq -c '.[]'| jq '.sha')
+        echo "workiz_actions_commit_sha $workiz_actions_commit_sha"
+
+        workiz_actions_commit_sha="${workiz_actions_commit_sha%\"}"
+        workiz_actions_commit_sha="${workiz_actions_commit_sha#\"}"
+        echo "workiz_actions_commit_sha $workiz_actions_commit_sha"
+
+        git_refs_response=$(
+        curl -s -X POST https://api.github.com/repos/Workiz/workiz-actions/git/refs \
+        -H "Authorization: token $GITHUB_TOKEN" \
+        -d @- << EOF
+
+        {
+        "ref": "refs/heads/$BACKEND_BRANCH",
+        "sha": "$workiz_actions_commit_sha"
+        }
+        EOF
+        )
+
+        git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+
+        echo "::debug::${git_refs_response}"
+        if [ "${git_ref_posted}" = "refs/heads/${BACKEND_BRANCH}" ]; then
+        exit 0
+        else
+        echo "::error::Branch was not created properly."
+        exit 1
+        fi
+
+  db-migrate:
+    name: db migrate RC MySQL
+    runs-on: backend-runner
+    steps:
+      - uses: actions/checkout@v3
+      - name: Checkout shared actions
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/workiz-actions
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          path: ./tmp/workiz-actions
+      - name: Checkout shared actions
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/workiz-actions
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          path: ./tmp/workiz-actions
+      - name: Run flyway migrate
+        uses: ./tmp/workiz-actions/flyway
+        with:
+          url: "jdbc:mysql://${{ env.MYSQL_HOST }}:3306/sendajobprod"
+          user: ${{ env.MYSQL_USER }}
+          password: ${{ env.MYSQL_PW }}
+          locations: filesystem:./conf/db_migrations/sql
+          command: migrate
+      - name: Send failure slack msg 
+        if: failure()  
+        uses: ./tmp/workiz-actions/slack-msg
+        with:
+          CHANNEL: 'nehora-test'
+          MESSAGE: 'db migrate on rc database failed :sob:'
+          SUCCESS: false
+          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+          LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'    
+  create-rc:
+    needs: [create-rc-branch]
+    name: create RC from tag.
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    # - uses: google-github-actions/auth@v0
+    #   with:
+    #     credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # - name: Create new environment
+    #   if: success()
+    #   run: | 
+    #     if [ -z "${MANUAL_TAG}" ]; then
+    #       MANUAL_TAG=${GITHUB_REF##*/}
+    #       echo "MANUAL_TAG=$MANUAL_TAG" >> $GITHUB_ENV
+    #     fi
+    #     gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/recreate_rc.sh '${MANUAL_TAG}'" --project=$GKE_CORE_PROJECT
+    - name: Send failure slack msg 
+      if: failure()  
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: 'RC failed to update :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
+
+  update-qa:
+    name: update qa.workiz.com
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    # - uses: google-github-actions/auth@v0
+    #   with:
+    #     credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # - name: Create new environment
+    #   if: success()
+    #   run: | 
+    #     if [ -z "${MANUAL_TAG}" ]; then
+    #       MANUAL_TAG=${GITHUB_REF##*/}
+    #       echo "MANUAL_TAG=$MANUAL_TAG" >> $GITHUB_ENV
+    #     fi
+    #     gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/qa-tag-pull.sh '${MANUAL_TAG}'" --project=$GKE_CORE_PROJECT
+    - name: Send failure slack msg 
+      if: failure()  
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: 'qa.workiz.com failed to update :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
+  send-slack-msg:
+    needs: [update-qa,create-rc,db-migrate]
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Send success slack msg 
+      if: success() 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: ' *RC and QA environments ready for testing* :charmander_dancing: '
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
