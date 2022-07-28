@@ -33,8 +33,32 @@ jobs:
         tag_name=${tag_name[1]}
         echo "$tag_name"
         tag_name="v$tag_name"
-        git tag -a $tag_name -m "$tag_name"
-        git push origin $tag_name
+        # git tag -a $tag_name -m "$tag_name"
+        # git push origin $tag_name
+        echo "$tag_name"
+        git tag $tag_name
+        commit=$(git rev-parse HEAD)
+        git_refs_response=$(
+        curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/git/refs \
+        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        -d @- << EOF
+
+        {
+        "ref": "refs/tags/$tag_name",
+        "sha": "$commit"
+        }
+        EOF
+        )
+
+        git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+
+        echo "::debug::${git_refs_response}"
+        if [ "${git_ref_posted}" = "refs/tags/${tag_name}" ]; then
+        exit 0
+        else
+        echo "::error::Tag was not created properly."
+        exit 1
+        fi
 
 # for i in "${ADDR[@]}"; do
      
