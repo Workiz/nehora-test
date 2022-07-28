@@ -1,0 +1,45 @@
+name: create tag and deploy
+on:
+  workflow_dispatch:
+
+env: 
+  BACKEND_BRANCH: ${{ github.ref_name }}
+  GCP_REGION: us-central1
+  GCP_ZONE: us-central1-b
+  GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
+
+jobs:
+  create-tag:
+    outputs: 
+      BACKEND_BRANCH: ${{ steps.create-rc-branch.outputs.BACKEND_BRANCH }}
+    name: create-tag
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: create rc branch
+      id: create-tag
+      # if: ${{ github.ref_name }} == "workiz.com"
+      run: | 
+        echo ${{env.BACKEND_BRANCH}}
+        IFS='-' read -ra tag_name <<< "${{env.BACKEND_BRANCH}}"
+        tag_name=${tag_name[0]}
+        echo "$tag_name"
+# for i in "${ADDR[@]}"; do
+     
+  # build-rc-env:
+  #   needs: [create-rc-branch]
+  #   name: build-rc-env
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v3
+  #   - uses: google-github-actions/auth@v0
+  #     with:
+  #       credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+  
+  #   - name: Create new environment
+  #     if: success()
+  #     run: | 
+  #       echo ${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}
+  #       # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/new_staging_env/create_new_env.sh 'null' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' 'false' 'true' " --project=$GKE_CORE_PROJECT

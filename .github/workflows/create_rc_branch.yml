@@ -53,4 +53,4 @@ jobs:
       if: success()
       run: | 
         echo ${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}
-        gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/new_staging_env/create_new_env.sh 'null' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' 'false' 'true' " --project=$GKE_CORE_PROJECT
+        # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/new_staging_env/create_new_env.sh 'null' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' 'false' 'true' " --project=$GKE_CORE_PROJECT
