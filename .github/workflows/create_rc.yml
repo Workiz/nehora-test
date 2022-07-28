@@ -91,14 +91,14 @@ jobs:
           ref: workiz.com
           token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
           path: ./tmp/workiz-actions
-      - name: Run flyway migrate
-        uses: ./tmp/workiz-actions/flyway
-        with:
-          url: "jdbc:mysql://${{ env.MYSQL_HOST }}:3306/sendajobprod"
-          user: ${{ env.MYSQL_USER }}
-          password: ${{ env.MYSQL_PW }}
-          locations: filesystem:./conf/db_migrations/sql
-          command: migrate
+      # - name: Run flyway migrate
+      #   uses: ./tmp/workiz-actions/flyway
+      #   with:
+      #     url: "jdbc:mysql://${{ env.MYSQL_HOST }}:3306/sendajobprod"
+      #     user: ${{ env.MYSQL_USER }}
+      #     password: ${{ env.MYSQL_PW }}
+      #     locations: filesystem:./conf/db_migrations/sql
+      #     command: migrate
       - name: Send failure slack msg 
         if: failure()  
         uses: ./tmp/workiz-actions/slack-msg
