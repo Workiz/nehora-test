@@ -21,7 +21,7 @@ jobs:
       id: create-tag
       # if: ${{ github.ref_name }} == "workiz.com"
       run: | 
-        if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
+        if [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(rc.*)-branch$ ]]; then
           echo "branch must be rc branch"
           exit 1
         fi
@@ -31,7 +31,7 @@ jobs:
         echo "$tag_name"
 # for i in "${ADDR[@]}"; do
      
-     
+
   # build-rc-env:
   #   needs: [create-rc-branch]
   #   name: build-rc-env
