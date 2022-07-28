@@ -15,13 +15,16 @@ jobs:
       if: ${{ github.ref_name }} == "workiz.com"
       run: | 
         echo ${{env.BACKEND_BRANCH}}
+        git fetch --tags
         last_tag=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1)  
         last_tag="${last_tag:1}"
+        echo "$last_tag"
         IFS='.' read -ra tag_parts <<< "$last_tag"
         part2=`expr ${tag_parts[1]} + 1`
         new_tag="${tag_parts[0]}.$part2"
         echo "new tag $new_tag"
         branch="rc$new_tag-branch"
+        echo "branch $branch"
         git checkout -b "$branch"
         git pull origin workiz.com
         git push --set-upstream origin "$branch" 

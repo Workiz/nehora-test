@@ -28,6 +28,12 @@
 #   echo "here"
 # fi
 
-last_tag="v3.123"
-last_tag="${last_tag:1}"
-echo "$last_tag"
+last_tag=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1)  
+        last_tag="${last_tag:1}"
+        echo "$last_tag"
+        IFS='.' read -ra tag_parts <<< "$last_tag"
+        part2=`expr ${tag_parts[1]} + 1`
+        new_tag="${tag_parts[0]}.$part2"
+        echo "new tag $new_tag"
+        branch="rc$new_tag-branch"
+        echo "branch $branch"
