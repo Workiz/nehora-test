@@ -21,15 +21,15 @@ jobs:
         last_tag="${last_tag:1}"
         echo "$last_tag"
         IFS='.' read -ra tag_parts <<< "$last_tag"
-        part2=`expr ${tag_parts[1]} + 4`
+        part2=`expr ${tag_parts[1]} + 5`
         new_tag="${tag_parts[0]}.$part2"
         echo "new tag $new_tag"
-        branch="rc$new_tag-branch"
-        echo "branch $branch"
-        git checkout -b "$branch"
+        BACKEND_BRANCH="rc$new_tag-branch"
+        echo "BACKEND_BRANCH $BACKEND_BRANCH"
+        git checkout -b "$BACKEND_BRANCH"
         git pull origin workiz.com
-        git push --set-upstream origin "$branch" 
-        echo "BACKEND_BRANCH=$branch" >> $GITHUB_ENV
+        git push --set-upstream origin "$BACKEND_BRANCH" 
+        echo "BACKEND_BRANCH=$BACKEND_BRANCH" >> $GITHUB_ENV
   build-rc-env:
     needs: [create-rc-branch]
     name: build-rc-env
