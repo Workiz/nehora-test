@@ -21,6 +21,10 @@ jobs:
       id: create-tag
       # if: ${{ github.ref_name }} == "workiz.com"
       run: | 
+        if [[ "$current_branch" !=~ ^(rc.*)-branch$ ]]; then
+          echo "branch must be rc branch"
+          exit 1
+        fi
         echo ${{env.BACKEND_BRANCH}}
         IFS='-' read -ra tag_name <<< "${{env.BACKEND_BRANCH}}"
         tag_name=${tag_name[0]}
