@@ -58,6 +58,7 @@ jobs:
         fi
 
   dyploy-preprod:
+    needs: [create-tag]
     name: dyploy-preprod
     runs-on: ubuntu-latest
     steps:
@@ -65,6 +66,7 @@ jobs:
       uses: actions/checkout@v3
 
   dyploy-prod:
+    needs: [create-tag,dyploy-preprod]
     name: dyploy-prod
     runs-on: ubuntu-latest
     steps:
