@@ -1,4 +1,4 @@
-name: Create rc branch
+name: Create rc
 on:
   workflow_dispatch:
 
