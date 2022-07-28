@@ -27,6 +27,7 @@ jobs:
         git push --set-upstream origin "$branch" 
         echo "{BACKEND_BRANCH}={$branch}" >> $GITHUB_ENV
   build-rc-env:
+    needs: [create-rc-branch]
     name: build-rc-env
     runs-on: ubuntu-latest
     steps:
