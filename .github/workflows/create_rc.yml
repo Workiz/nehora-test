@@ -176,6 +176,22 @@ jobs:
         SUCCESS: false
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
+  
+  e2e-tests:
+    needs: [update-qa,create-rc,db-migrate]
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+
   send-slack-msg:
     needs: [update-qa,create-rc,db-migrate]
     name: send slack msg
