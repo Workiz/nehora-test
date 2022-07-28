@@ -39,7 +39,7 @@ jobs:
         BACKEND_BRANCH="rc$new_tag-branch"
         echo "BACKEND_BRANCH $BACKEND_BRANCH"
         git checkout -b "$BACKEND_BRANCH"
-        git pull origin workiz.com
+        # git pull origin workiz.com
         git push --set-upstream origin "$BACKEND_BRANCH" 
         echo "::set-output name=BACKEND_BRANCH::$BACKEND_BRANCH"
 

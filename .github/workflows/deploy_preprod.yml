@@ -18,8 +18,8 @@ jobs:
       id: create-tag
       # if: ${{ github.ref_name }} == "workiz.com"
       run: | 
-        if [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(rc.*)-branch$ ]]; then
-          echo "branch must be rc branch"
+        if [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(rc.*)-branch$ ]] && [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(v.*)-branch ]]; then
+          echo "branch must be rc or hot-fix branch"
           exit 1
         fi
         echo ${{env.BACKEND_BRANCH}}
