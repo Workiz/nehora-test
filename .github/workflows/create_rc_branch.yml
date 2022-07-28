@@ -1,7 +1,9 @@
-name: Create branch
+name: Create rc branch
 on:
   workflow_dispatch:
 
+env: 
+  BACKEND_BRANCH: $GITHUB_REF_NAME
 jobs:
   create-rc-branch:
     name: create-rc-branch
@@ -9,15 +11,33 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Check out repository
+    - name: create rc branch
+      if: $GITHUB_REF_NAME == "workiz.com"
+      run: | 
+        echo ${{env.BACKEND_BRANCH}}
+        last_tag=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1)  
+        last_tag="${last_tag:1}"
+        IFS='.' read -ra tag_parts <<< "$last_tag"
+        part2=`expr ${tag_parts[1]} + 1`
+        new_tag="${tag_parts[0]}.$part2"
+        echo "new tag $new_tag"
+        branch="rc$new_tag-branch"
+        git checkout -b "$branch"
+        git pull origin workiz.com
+        git push --set-upstream origin "$branch" 
+        echo "{BACKEND_BRANCH}={$branch}" >> $GITHUB_ENV
+  build-rc-env:
+    name: build-rc-env
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
       uses: actions/checkout@v3
+    - uses: google-github-actions/auth@v0
       with:
-        repository: Workiz/workiz-actions
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-        fetch-depth: '0'
-    - name: create-rc-branch  
-      uses: ./tmp/workiz-actions/create-rc-branch
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+  
+    - name: Create new environment
+      if: success()
+      run: | 
+        echo ${{env.BACKEND_BRANCH}}
+        # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/new_staging_env/create_new_env.sh '${FRONTEND_BRANCH}' '${BACKEND_BRANCH}' '${USER_NAME}' '${CREATE_FRONTEND}' '${TEMP_ENV}' " --project=$GKE_CORE_PROJECT
