@@ -4,9 +4,6 @@ on:
 
 env: 
   BACKEND_BRANCH: ${{ github.ref_name }}
-  GCP_REGION: us-central1
-  GCP_ZONE: us-central1-b
-  GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
 
 jobs:
   create-tag:
@@ -21,7 +18,7 @@ jobs:
       id: create-tag
       # if: ${{ github.ref_name }} == "workiz.com"
       run: | 
-        if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
+        if [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(rc.*)-branch$ ]]; then
           echo "branch must be rc branch"
           exit 1
         fi
@@ -29,21 +26,49 @@ jobs:
         IFS='-' read -ra tag_name <<< "${{env.BACKEND_BRANCH}}"
         tag_name=${tag_name[0]}
         echo "$tag_name"
-# for i in "${ADDR[@]}"; do
-     
-  # build-rc-env:
-  #   needs: [create-rc-branch]
-  #   name: build-rc-env
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v3
-  #   - uses: google-github-actions/auth@v0
-  #     with:
-  #       credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-  
-  #   - name: Create new environment
-  #     if: success()
-  #     run: | 
-  #       echo ${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}
-  #       # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/new_staging_env/create_new_env.sh 'null' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' '${{needs.create-rc-branch.outputs.BACKEND_BRANCH}}' 'false' 'true' " --project=$GKE_CORE_PROJECT
+        IFS='c' read -ra tag_name <<< "$tag_name"
+        tag_name=${tag_name[1]}
+        echo "$tag_name"
+        tag_name="v$tag_name"
+        # git tag -a $tag_name -m "$tag_name"
+        # git push origin $tag_name
+        echo "$tag_name"
+        git tag $tag_name
+        commit=$(git rev-parse HEAD)
+        git_refs_response=$(
+        curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/git/refs \
+        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        -d @- << EOF
+
+        {
+        "ref": "refs/tags/$tag_name",
+        "sha": "$commit"
+        }
+        EOF
+        )
+
+        git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
+
+        echo "::debug::${git_refs_response}"
+        if [ "${git_ref_posted}" = "refs/tags/${tag_name}" ]; then
+        exit 0
+        else
+        echo "::error::Tag was not created properly."
+        exit 1
+        fi
+
+  dyploy-preprod:
+    needs: [create-tag]
+    name: dyploy-preprod
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+  dyploy-prod:
+    needs: [create-tag,dyploy-preprod]
+    name: dyploy-prod
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3

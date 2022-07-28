@@ -28,12 +28,17 @@
 #   echo "here"
 # fi
 
-last_tag=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1)  
-        last_tag="${last_tag:1}"
-        echo "$last_tag"
-        IFS='.' read -ra tag_parts <<< "$last_tag"
-        part2=`expr ${tag_parts[1]} + 1`
-        new_tag="${tag_parts[0]}.$part2"
-        echo "new tag $new_tag"
-        branch="rc$new_tag-branch"
-        echo "branch $branch"
+# last_tag=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1)  
+#         last_tag="${last_tag:1}"
+#         echo "$last_tag"
+#         IFS='.' read -ra tag_parts <<< "$last_tag"
+#         part2=`expr ${tag_parts[1]} + 1`
+#         new_tag="${tag_parts[0]}.$part2"
+#         echo "new tag $new_tag"
+#         branch="rc$new_tag-branch"
+#         echo "branch $branch"
+current_branch="rc3.329-branch"
+if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
+          echo "branch must be rc branch"
+          exit 1
+        fi
