@@ -39,7 +39,7 @@ jobs:
         # git push --set-upstream origin "$BACKEND_BRANCH" 
         echo "::set-output name=BACKEND_BRANCH::$BACKEND_BRANCH"
 
-        workiz_actions_commit_sha=$(curl -X GET "https://api.github.com/repos/Workiz/workiz-actions/commits?per_page=1"  -H "Accept: application/vnd.github+json"    -H "Authorization: token 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  " | jq -c '.[]'| jq '.sha')
+        workiz_actions_commit_sha=$(curl -X GET "https://api.github.com/repos/Workiz/workiz-actions/commits?per_page=1"  -H "Accept: application/vnd.github+json"    -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}  " | jq -c '.[]'| jq '.sha')
         echo "workiz_actions_commit_sha $workiz_actions_commit_sha"
 
         workiz_actions_commit_sha="${workiz_actions_commit_sha%\"}"
