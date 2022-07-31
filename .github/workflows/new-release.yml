@@ -70,7 +70,8 @@ jobs:
       with:
         GITHUB_ACTOR: ${{ github.actor }}
 
-  create-release-branch:
+  create-release-branch-and-rc-env:
+    needs: [check-github-actor]
     name: create frontend and backend branches 
     runs-on: ubuntu-latest
     steps:
@@ -95,197 +96,129 @@ jobs:
       with:
         GITHUB_ACTOR: ${{ github.actor }}
 
-  # setup-build-publish-deploy:
-  #   name: Setup, Build, Publish, and Deploy
-  #   runs-on: ubuntu-latest
-  #   environment: prod
-  #   steps:
+  db-migrate:
+    needs: [create-release-branch-and-rc-env]
+    name: db migrate RC MySQL
+    runs-on: backend-runner
+    steps:
+      - run: echo "db"
+      # - uses: actions/checkout@v3
+      # - name: Checkout shared actions
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: Workiz/workiz-actions
+      #     ref: workiz.com
+      #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      #     path: ./tmp/workiz-actions
+      # - name: Checkout shared actions
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: Workiz/workiz-actions
+      #     ref: workiz.com
+      #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      #     path: ./tmp/workiz-actions
+      # - name: Run flyway migrate
+      #   uses: ./tmp/workiz-actions/flyway
+      #   with:
+      #     url: "jdbc:mysql://${{ env.MYSQL_HOST }}:3306/sendajobprod"
+      #     user: ${{ env.MYSQL_USER }}
+      #     password: ${{ env.MYSQL_PW }}
+      #     locations: filesystem:./conf/db_migrations/sql
+      #     command: migrate
+      # - name: Send failure slack msg 
+      #   if: failure()  
+      #   uses: ./tmp/workiz-actions/slack-msg
+      #   with:
+      #     CHANNEL: 'release-committee'
+      #     MESSAGE: 'db migrate on rc database failed :sob:'
+      #     SUCCESS: false
+      #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+      #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
 
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
-
-  #   # Setup gcloud CLI
-  #   - uses: google-github-actions/setup-gcloud@v0
-  #     with:
-  #       version: '365.0.1'
-  #       service_account_email: ${{ secrets.GKE_EMAIL }}
-  #       service_account_key: ${{ secrets.GKE_KEY }}
-  #       export_default_credentials: true
-  #       project_id: ${{ secrets.GKE_PROJECT }}
-  #   - run: |
-  #       gcloud components install beta
-    
-    
-  #   - name: install pip requirements
-  #     run: pip install -r .github/requirements.txt
-    
-  #   - name: switch preprod backend with pro backend
-  #     if: success()
-  #     run: | 
-  #       gcloud config set project $GKE_PROJECT 
-  #       gcloud config set compute/region $GCP_REGION
-  #       #get current services 
-  #       #preprod current service 
-  #       DEFAULT_SERVICE=$(gcloud compute url-maps describe $URL_MAP_NAME  --format="json" | python -c "import sys, json; print(list(filter(lambda d:d['name'] == '${PREPROD_PATH_MATCHER}' , json.load(sys.stdin)['pathMatchers']))[0]['defaultService'])")
-  #       #app service before the switch 
-  #       APP_SERVICE=$(gcloud compute url-maps describe $URL_MAP_NAME  --format="json" | python -c "import sys, json; print(list(filter(lambda d:d['name'] == '${APP_PATH_MATCHER}' , json.load(sys.stdin)['pathMatchers']))[0]['defaultService'])")
-        
-  #       #### A check to see if backends are different and there wasn't any issues 
-  #       if [[ "$DEFAULT_SERVICE" == "$APP_SERVICE" ]]; then
-  #         echo "Something wrong,Preprod backend and Prod backend are the same."
-  #         # Will stop the build if they are the same.
-  #         exit 1
-  #       fi
-
-        
-  #       APP_CURRENT_PROD_GROUP=$(gcloud compute backend-services describe $APP_SERVICE --global --format=json  | python -c "import sys, json; print(json.load(sys.stdin)['backends'][0]['group'].rsplit('/',1)[1])")
-  #       APP_CURRENT_PREPROD_GROUP=$(gcloud compute backend-services describe $DEFAULT_SERVICE --global --format=json  | python -c "import sys, json; print(json.load(sys.stdin)['backends'][0]['group'].rsplit('/',1)[1])")
-  #       echo "get current prod size"
-        
-  #       CURRENT_PROD_GROUP_SIZE=$(gcloud compute instance-groups describe ${APP_CURRENT_PROD_GROUP} --zone $GCP_ZONE --format json  | python -c "import sys, json; print(json.load(sys.stdin)['size'])")
-  #       if [[ "$CURRENT_PROD_GROUP_SIZE" -lt "$PROD_DEFAULT_MIN_REPLICAS" ]]; then
-  #         echo "Something went wrong, current prod backend size is less than 3"
-  #         exit 1
-  #       fi
-
-  #       # Scale current pre prod to current prod size
-  #       echo "Scaling current preprod $APP_CURRENT_PREPROD_GROUP MIG to current prod size (min: $CURRENT_PROD_GROUP_SIZE, max: $MAX_REPLICAS)"
-  #       gcloud compute instance-groups managed set-autoscaling $APP_CURRENT_PREPROD_GROUP  \
-  #         --max-num-replicas ${MAX_REPLICAS} \
-  #         --min-num-replicas ${CURRENT_PROD_GROUP_SIZE} \
-  #         --target-cpu-utilization ${AUTOSCALE_CPU} \
-  #         --cool-down-period ${COOL_DOWN_SECS}  \
-  #         --zone=${GCP_ZONE} \
-  #         --scale-in-control time-window=600,max-scaled-in-replicas-percent=20
-        
-  #       echo "Waiting for current pre prod $APP_CURRENT_PREPROD_GROUP MIG to scale cuurent prod size. This can take a few minutes."
-  #       python .github/wait-mig-stable.py --instance-group-manager ${APP_CURRENT_PREPROD_GROUP} --min-replicas ${CURRENT_PROD_GROUP_SIZE}
-  #       if [[ "$?" -ne "0" ]]; then
-  #         echo "Something went wrong, scale pre prod failed"
-  #         exit 1
-  #       fi  
-
-  #       echo "Increasing FE CUR VER before the deploy."
-  #       curl https://us-central1-genial-runway-125805.cloudfunctions.net/build-version?env=app.workiz.com
-  #       curl https://us-central1-genial-runway-125805.cloudfunctions.net/build-version?env=preprod.workiz.com  
-
-  #       #preprod backend static bucket 
-  #       PREPROD_SVC_URL=https://www.googleapis.com/compute/beta/projects/$GKE_PROJECT/global/backendBuckets/$PREPROD_BE_BUCKET
-  #       #app backend static bucket 
-  #       PROD_SVC_URL=https://www.googleapis.com/compute/beta/projects/$GKE_PROJECT/global/backendBuckets/$PROD_BE_BUCKET
-  #       #create load balancer hosting and redirect rules
-  #       #starting with releasing preprod content to app 
-  #       #default app.workiz.com 
-  #       gcloud compute url-maps add-path-matcher $URL_MAP_NAME   --default-service $DEFAULT_SERVICE  --path-matcher-name $APP_PATH_MATCHER  --existing-host=app.workiz.com  --delete-orphaned-path-matcher
-  #       #static assets with /_assets path (fixed)
-  #       gcloud compute url-maps add-path-matcher $URL_MAP_NAME  --default-service $DEFAULT_SERVICE  --path-matcher-name $APP_PATH_MATCHER  --existing-host=app.workiz.com --backend-bucket-path-rules=/_assets/*=$PROD_SVC_URL --delete-orphaned-path-matcher
-  #       #api.workiz.com 
-  #       gcloud compute url-maps add-path-matcher $URL_MAP_NAME  --default-service $DEFAULT_SERVICE  --path-matcher-name $API_PATH_MATCHER  --existing-host=api.workiz.com --delete-orphaned-path-matcher
-  #       #api-cf.workiz.com 
-  #       gcloud compute url-maps add-path-matcher $URL_MAP_NAME  --default-service $DEFAULT_SERVICE  --path-matcher-name $API_PATH_MATCHER  --existing-host=api-cf.workiz.com --delete-orphaned-path-matcher
-
-  #       #now switching with pre-production
-  #       #default preprod.workiz.com
-  #       gcloud compute url-maps add-path-matcher $URL_MAP_NAME  --default-service $APP_SERVICE  --path-matcher-name $PREPROD_PATH_MATCHER  --existing-host=preprod.workiz.com --delete-orphaned-path-matcher
-  #       #preprod assets (fixed)
-  #       gcloud compute url-maps add-path-matcher $URL_MAP_NAME  --default-service $APP_SERVICE  --path-matcher-name $PREPROD_PATH_MATCHER  --existing-host=preprod.workiz.com --backend-bucket-path-rules=/_assets/*=$PREPROD_SVC_URL --delete-orphaned-path-matcher
-  #       #default global service 
-  #       gcloud compute url-maps set-default-service backend-preprod-lb --default-service=$APP_SERVICE
-        
-  #       # swap names of instances groups (Just to clarify the action)
-  #       APP_NEW_PROD_GROUP=$APP_CURRENT_PREPROD_GROUP
-  #       APP_NEW_PREPROD_GROUP=$APP_CURRENT_PROD_GROUP
-  #       # swap name of vars
+  create-rc:
+    name: create RC from tag.
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo " $BRANCH {{ env.BRANCH }} "
+    # - name: Checkout
+    #   uses: actions/checkout@v3
+    # - name: Checkout shared actions
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/workiz-actions
+    #     ref: workiz.com
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    #     path: ./tmp/workiz-actions
+    # - uses: google-github-actions/auth@v0
+    #   with:
+    #     credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # - name: Create new environment
+    #   if: success()
+    #   run: | 
+    #     if [ -z "${MANUAL_TAG}" ]; then
+    #       MANUAL_TAG=${GITHUB_REF##*/}
+    #       echo "MANUAL_TAG=$MANUAL_TAG" >> $GITHUB_ENV
+    #     fi
+    #     gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/recreate_rc.sh '${MANUAL_TAG}'" --project=$GKE_CORE_PROJECT
+    # - name: Send success slack msg 
+    #   if: success() 
+    #   uses: ./tmp/workiz-actions/slack-msg
+    #   with:
+    #     CHANNEL: 'release-committee'
+    #     MESSAGE: 'RC got updated with ${{env.MANUAL_TAG}} :charmander_dancing:'
+    #     SUCCESS: true
+    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+    # - name: Send failure slack msg 
+    #   if: failure()  
+    #   uses: ./tmp/workiz-actions/slack-msg
+    #   with:
+    #     CHANNEL: 'release-committee'
+    #     MESSAGE: 'RC failed to update :sob:'
+    #     SUCCESS: false
+    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'   
+  update-qa:
+    name: update qa.workiz.com
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    - name: Create new environment
+      if: success()
+      run: | 
+        if [ -z "${MANUAL_TAG}" ]; then
+          MANUAL_TAG=${GITHUB_REF##*/}
+          echo "MANUAL_TAG=$MANUAL_TAG" >> $GITHUB_ENV
+        fi
+        gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/qa-tag-pull.sh '${MANUAL_TAG}'" --project=$GKE_CORE_PROJECT
+    - name: Send success slack msg 
+      if: success() 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'release-committee'
+        MESSAGE: 'qa.workiz.com got updated with ${{env.MANUAL_TAG}} :charmander_dancing:'
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+    - name: Send failure slack msg 
+      if: failure()  
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'release-committee'
+        MESSAGE: 'qa.workiz.com failed to update :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
 
-  #       # downscale preprod and prod recommended size to default
-
-  #       echo "set $APP_NEW_PREPROD_GROUP MIG to min: $MIN_REPLICAS, and max: $MAX_REPLICAS"
-  #       gcloud compute instance-groups managed set-autoscaling $APP_NEW_PREPROD_GROUP  \
-  #         --max-num-replicas $MAX_REPLICAS \
-  #         --min-num-replicas $MIN_REPLICAS \
-  #         --target-cpu-utilization ${AUTOSCALE_CPU} \
-  #         --cool-down-period ${COOL_DOWN_SECS}  \
-  #         --zone=${GCP_ZONE} \
-  #         --scale-in-control time-window=600,max-scaled-in-replicas-percent=20
-
-
-  #       echo "set $APP_NEW_PROD_GROUP MIG to min: $PROD_DEFAULT_MIN_REPLICAS, and max: $MAX_REPLICAS"
-  #       gcloud compute instance-groups managed set-autoscaling $APP_NEW_PROD_GROUP  \
-  #         --max-num-replicas $MAX_REPLICAS \
-  #         --min-num-replicas $PROD_DEFAULT_MIN_REPLICAS \
-  #         --target-cpu-utilization ${AUTOSCALE_CPU} \
-  #         --cool-down-period ${COOL_DOWN_SECS}  \
-  #         --zone=${GCP_ZONE} \
-  #         --scale-in-control time-window=600,max-scaled-in-replicas-percent=20
-
-  #   - name: release frontend and static files
-  #     if: success()
-  #     run: | 
-  #       #switch static files 
-  #       gsutil cp  gs://$BUCKET_PATH/bundle.js   gs://$BUCKET_ROLLBACK_PATH/${GITHUB_SHA:32}-bundle.js
-  #       gsutil cp  gs://$BUCKET_PATH/bundle.js.map   gs://$BUCKET_ROLLBACK_PATH/${GITHUB_SHA:32}-bundle.js.map
-
-  #       gsutil cp  gs://$BUCKET_PRE_PATH/bundle.js gs://$BUCKET_PATH/bundle.js
-  #       gsutil cp  gs://$BUCKET_PRE_PATH/bundle.js.map gs://$BUCKET_PATH/bundle.js.map
-
-  #       gsutil cp  gs://$BUCKET_ROLLBACK_PATH/${GITHUB_SHA:32}-bundle.js gs://$BUCKET_PRE_PATH/bundle.js
-  #       gsutil cp  gs://$BUCKET_ROLLBACK_PATH/${GITHUB_SHA:32}-bundle.js.map gs://$BUCKET_PRE_PATH/bundle.js.map
-  #       #switch static files 
-        
-  #       echo "Increasing FE CUR VER after the deploy."
-  #       curl https://us-central1-genial-runway-125805.cloudfunctions.net/build-version?env=app.workiz.com
-  #       curl https://us-central1-genial-runway-125805.cloudfunctions.net/build-version?env=preprod.workiz.com    
-  #   - name: release backend static files
-  #     if: success()
-  #     run: | 
-  #       PREPROD_SVC_URL=https://www.googleapis.com/compute/beta/projects/$GKE_PROJECT/global/backendBuckets/$PREPROD_BE_BUCKET
-  #       PROD_SVC_URL=https://www.googleapis.com/compute/beta/projects/$GKE_PROJECT/global/backendBuckets/$PROD_BE_BUCKET
-
-  #       PREPROD_CURRENT_BUCKET=$(gcloud compute backend-buckets describe   $PREPROD_SVC_URL --format=json --quiet |  python -c "import sys, json; print(json.load(sys.stdin)['bucketName'])")
-  #       OLD_PROD_BUCKET=$(gcloud compute backend-buckets describe   $PROD_SVC_URL --format=json --quiet |  python -c "import sys, json; print (json.load(sys.stdin)['bucketName'])")
-        
-  #       gcloud compute backend-buckets update $PROD_SVC_URL --gcs-bucket-name=$PREPROD_CURRENT_BUCKET
-  #       gcloud compute backend-buckets update $PREPROD_SVC_URL --gcs-bucket-name=$OLD_PROD_BUCKET
-  #   - name: release long process api
-  #     if: success()
-  #     run: | 
-  #       #replace between groups
-  #       CURRENT_GROUP=$(gcloud compute backend-services describe $LONG_PROCESS_BE --global --format=json --quiet | python -c "import sys, json; print(json.load(sys.stdin)['backends'][0]['group'].rsplit('/',1)[1])")
-  #       if [ $CURRENT_GROUP = $SECOND_GROUP ]; then NEXT_GROUP=$FIRST_GROUP; else NEXT_GROUP=$SECOND_GROUP; fi
-  #       gcloud compute backend-services add-backend $LONG_PROCESS_BE --balancing-mode RATE --max-rate $MAX_RPS --instance-group $NEXT_GROUP --instance-group-zone $GCP_ZONE --global
-  #       gcloud compute backend-services remove-backend $LONG_PROCESS_BE --instance-group $CURRENT_GROUP --instance-group-zone $GCP_ZONE --global
-    
-  #   - name: release internal api
-  #     if: success()
-  #     run: | 
-  #       #replace between groups
-  #       INTERNAL_GROUP=$(gcloud compute backend-services describe $WORKIZ_INTERNAL_BE --region=us-central1 --format=json --quiet | python -c "import sys, json; print(json.load(sys.stdin)['backends'][0]['group'].rsplit('/',1)[1])")
-  #       if [ $INTERNAL_GROUP = $SECOND_GROUP ]; then NEXT_INTERNAL_GROUP=$FIRST_GROUP; else NEXT_INTERNAL_GROUP=$SECOND_GROUP; fi
-  #       gcloud compute backend-services add-backend $WORKIZ_INTERNAL_BE  --balancing-mode CONNECTION  --instance-group $NEXT_INTERNAL_GROUP --instance-group-zone $GCP_ZONE --region $GCP_REGION
-  #       gcloud compute backend-services remove-backend $WORKIZ_INTERNAL_BE --instance-group $INTERNAL_GROUP --instance-group-zone $GCP_ZONE  --region $GCP_REGION
-    
-  #   - name: git pull in legacy servers
-  #     if: success()
-  #     run: | 
-  #       #activate git pull script inside the machine
-  #       gcloud compute ssh workiz-web01-ver1  --zone=us-central1-b --command "sudo /var/scripts/pull_from_tag.sh $GITHUB_REF_NAME"
-
-  #   - name: send confirmation email
-  #     if: success()
-  #     run: |
-  #       curl -sv --user "api:$MAILGUNKEY" https://api.mailgun.net/v3/mg.sendajob.com/messages -F from='Workiz Deployment <notify@workiz.com>' -F to=release@workiz.com -F subject='Release is ready' --form-string html='<html><body><table><tr><td><h4>PreProd release is done, It will take a few minutes to update </br> <a href="https://github.com/saarubio/sendajob-repo/actions">Press this link to view log  </a>   </h4></td></tr></table></body></html>';     
-
-  #   - name: release to amplitude
-  #     if: success()
-  #     run: |
-  #       release_date=$(date '+%Y-%m-%d %H:%M:%S')
-  #       TAG=${GITHUB_REF/refs\/tags\//}
-  #       curl -d "version=$TAG&release_start=$release_date&release_end=$release_date&title=$TAG&description=backend release&platforms=Desktop&params={\"created_by\": \"infra@workiz.com\"}" -u $AMPLITUDE_API_KEY:$AMPLITUDE_SECRET_KEY -X POST https://amplitude.com/api/2/release
-
-  #   - name: ':email: Send notification about release'
-  #     if: success()
-  #     env:
-  #       SLACK_RELEASES: ${{ secrets.SLACK_RELEASES }}
-  #       GH_TOKEN_REPOS: ${{ secrets.GH_TOKEN_REPOS }}
-  #     run: .github/release.sh
