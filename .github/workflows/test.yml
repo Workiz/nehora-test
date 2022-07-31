@@ -17,22 +17,22 @@ env:
 
 jobs:
 
-  db-migrate:
-    name: db migrate RC MySQL
-    runs-on: ubuntu-latest
-    steps:
-      - name: test
-        run: echo "db-migrate"
+  # db-migrate:
+  #   name: db migrate RC MySQL
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: test
+  #       run: echo "db-migrate"
 
-  create-rc:
-    name: create-rc
-    runs-on: ubuntu-latest
-    steps:
-      - name: test
-        run: echo "hi"
+  # create-rc:
+  #   name: create-rc
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: test
+  #       run: echo "hi"
 
   send-slack-msg:
-    needs: [create-rc,db-migrate]
+    # needs: [create-rc,db-migrate]
     name: send slack msg
     runs-on: ubuntu-latest
     steps:
@@ -41,16 +41,21 @@ jobs:
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
-        repository: Workiz/workiz-actions
+        repository: Workiz/nehora
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
+        path: ./tmp/nehora
     - name: Send success slack msg 
-      if: success() 
-      uses: ./tmp/workiz-actions/slack-msg
-      with:
-        CHANNEL: 'nehora-test'
-        MESSAGE: '*qa.workiz.com got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: \n *RC got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: '
-        SUCCESS: true
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+      run: |
+       cd ./tmp/nehora
+       ls
+       git config --global --add safe.directory /github/workspace
+       git status
+      # if: success() 
+      # uses: ./tmp/workiz-actions/slack-msg
+      # with:
+      #   CHANNEL: 'nehora-test'
+      #   MESSAGE: '*qa.workiz.com got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: \n *RC got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: '
+      #   SUCCESS: true
+      #   WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+      #   LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
