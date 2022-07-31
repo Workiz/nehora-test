@@ -89,7 +89,8 @@ jobs:
     - name: use env.js for ci
       run: mv env-ci.js env.js
     - name: install npm modules with npm ci
-      run: npm ci
+      run: echo "npm ci"
+      # run: npm ci
     # - name: unit test
     #   if: success()
     #   run: |
@@ -97,7 +98,7 @@ jobs:
     - name: build asset
       if: success()
       run: |
-        npm run build-ci
+        # npm run build-ci
     # Rollout to Ig
     # - name: deploy
     #   if: success()
