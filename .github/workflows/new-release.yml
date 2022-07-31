@@ -106,7 +106,8 @@ jobs:
   db-migrate:
     needs: [create-release-branch]
     name: db migrate RC MySQL
-    runs-on: backend-runner
+    # runs-on: backend-runner
+    runs-on: ubuntu-latest
     steps:
       - run: echo ${{needs.create-release-branch.outputs.branch}}
       # - uses: actions/checkout@v3
