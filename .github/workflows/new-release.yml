@@ -70,7 +70,9 @@ jobs:
       with:
         GITHUB_ACTOR: ${{ github.actor }}
 
-  create-release-branch-and-rc-env:
+  create-release-branch:
+    outputs:
+      branch: ${{ steps.branch.outputs.branch }}
     needs: [check-github-actor]
     name: create frontend and backend branches 
     runs-on: ubuntu-latest
@@ -96,16 +98,17 @@ jobs:
       with:
         GITHUB_ACTOR: ${{ github.actor }}
     - name: echo env
+    - id: branch
       run: |
-        echo "BRANCH=123" >> $GITHUB_ENV
         echo  ${{ env.BRANCH }}
+        echo "::set-output name=branch::${{ env.BRANCH }}"
 
   db-migrate:
-    needs: [create-release-branch-and-rc-env]
+    needs: [create-release-branch]
     name: db migrate RC MySQL
     runs-on: backend-runner
     steps:
-      - run: echo "db"
+      - run: echo ${{needs.create-release-branch.outputs.branch}}
       # - uses: actions/checkout@v3
       # - name: Checkout shared actions
       #   uses: actions/checkout@v3
@@ -140,7 +143,7 @@ jobs:
       #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
 
   create-rc:
-    needs: [create-release-branch-and-rc-env]
+    needs: [create-release-branch]
     name: create RC from tag.
     runs-on: ubuntu-latest
     steps:
