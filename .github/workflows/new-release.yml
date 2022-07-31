@@ -19,6 +19,11 @@ on:
   #   types: [rollback]
 # Environment variables available to all jobs and steps in this workflow
 env:
+  BUCKET_PATH:  static-cdn.workiz.com/fe/pre/latest
+  BUCKET_ROLLBACK_PATH:  static-cdn.workiz.com/fe/older
+  GITHUB_SHA: ${{ github.sha }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
   GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
@@ -31,9 +36,6 @@ env:
   MIG:  preprod-ig
   URL_MAP_NAME: backend-preprod-lb
   BUCKET_PRE_PATH:  static-cdn.workiz.com/fe/pre/latest
-  BUCKET_PATH:  static-cdn.workiz.com/fe/latest
-  BUCKET_ROLLBACK_PATH:  static-cdn.workiz.com/fe/older
-  GITHUB_SHA: ${{ github.sha }}
   API_PATH_MATCHER: path-matcher-7
   APP_PATH_MATCHER: path-matcher-3
   PREPROD_PATH_MATCHER: path-matcher-6
