@@ -12,12 +12,7 @@ name: New full release to production with frontend.
 
 on:
   workflow_dispatch:
-    
-  # release:
-  #   types: [created]
-  # repository_dispatch:
-  #   types: [rollback]
-# Environment variables available to all jobs and steps in this workflow
+
 env:
   BUCKET_PATH:  static-cdn.workiz.com/fe/pre/latest
   BUCKET_ROLLBACK_PATH:  static-cdn.workiz.com/fe/older
@@ -97,7 +92,7 @@ jobs:
       uses: ./tmp/workiz-actions/create-rc-branch
       with:
         GITHUB_ACTOR: ${{ github.actor }}
-    - name: echo env
+    - name: set branch output
       id: branch
       run: |
         echo  ${{ env.BRANCH }}
