@@ -183,43 +183,44 @@ jobs:
     name: update qa.workiz.com
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-    - uses: google-github-actions/auth@v0
-      with:
-        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-    - name: Create new environment
-      if: success()
-      run: | 
-        if [ -z "${MANUAL_TAG}" ]; then
-          MANUAL_TAG=${GITHUB_REF##*/}
-          echo "MANUAL_TAG=$MANUAL_TAG" >> $GITHUB_ENV
-        fi
-        gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/qa-tag-pull.sh '${MANUAL_TAG}'" --project=$GKE_CORE_PROJECT
-    - name: Send success slack msg 
-      if: success() 
-      uses: ./tmp/workiz-actions/slack-msg
-      with:
-        CHANNEL: 'release-committee'
-        MESSAGE: 'qa.workiz.com got updated with ${{env.MANUAL_TAG}} :charmander_dancing:'
-        SUCCESS: true
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
-    - name: Send failure slack msg 
-      if: failure()  
-      uses: ./tmp/workiz-actions/slack-msg
-      with:
-        CHANNEL: 'release-committee'
-        MESSAGE: 'qa.workiz.com failed to update :sob:'
-        SUCCESS: false
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+      - run: echo "here"
+    # - name: Checkout
+    #   uses: actions/checkout@v3
+    # - name: Checkout shared actions
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/workiz-actions
+    #     ref: workiz.com
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    #     path: ./tmp/workiz-actions
+    # - uses: google-github-actions/auth@v0
+    #   with:
+    #     credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # - name: Create new environment
+    #   if: success()
+    #   run: | 
+    #     if [ -z "${MANUAL_TAG}" ]; then
+    #       MANUAL_TAG=${GITHUB_REF##*/}
+    #       echo "MANUAL_TAG=$MANUAL_TAG" >> $GITHUB_ENV
+    #     fi
+    #     gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/qa-tag-pull.sh '${MANUAL_TAG}'" --project=$GKE_CORE_PROJECT
+    # - name: Send success slack msg 
+    #   if: success() 
+    #   uses: ./tmp/workiz-actions/slack-msg
+    #   with:
+    #     CHANNEL: 'release-committee'
+    #     MESSAGE: 'qa.workiz.com got updated with ${{env.MANUAL_TAG}} :charmander_dancing:'
+    #     SUCCESS: true
+    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+    # - name: Send failure slack msg 
+    #   if: failure()  
+    #   uses: ./tmp/workiz-actions/slack-msg
+    #   with:
+    #     CHANNEL: 'release-committee'
+    #     MESSAGE: 'qa.workiz.com failed to update :sob:'
+    #     SUCCESS: false
+    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
 
