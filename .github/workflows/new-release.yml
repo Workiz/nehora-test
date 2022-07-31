@@ -136,6 +136,7 @@ jobs:
       #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
 
   create-rc:
+    needs: [create-release-branch-and-rc-env]
     name: create RC from tag.
     runs-on: ubuntu-latest
     steps:
