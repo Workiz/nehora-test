@@ -98,7 +98,7 @@ jobs:
     - name: echo env
       run: |
         echo "BRANCH=123" >> $GITHUB_ENV
-        echo " $BRANCH "
+        echo  ${{ env.BRANCH }}
 
   db-migrate:
     needs: [create-release-branch-and-rc-env]
