@@ -98,7 +98,7 @@ jobs:
       with:
         GITHUB_ACTOR: ${{ github.actor }}
     - name: echo env
-    - id: branch
+      id: branch
       run: |
         echo  ${{ env.BRANCH }}
         echo "::set-output name=branch::${{ env.BRANCH }}"
@@ -106,8 +106,7 @@ jobs:
   db-migrate:
     needs: [create-release-branch]
     name: db migrate RC MySQL
-    # runs-on: backend-runner
-    runs-on: ubuntu-latest
+    runs-on: backend-runner
     steps:
       - run: echo ${{needs.create-release-branch.outputs.branch}}
       # - uses: actions/checkout@v3
