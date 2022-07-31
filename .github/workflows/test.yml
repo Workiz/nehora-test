@@ -41,8 +41,8 @@ jobs:
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
-        repository: Workiz/nehora
-        ref: master
+        repository: Workiz/workiz-actions
+        ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/nehora
     - name: Send success slack msg 
