@@ -1,51 +1,16 @@
-# This workflow will build a docker container, publish it to Google Container Registry, and deploy it to GKE when a release is created
-#
-# To configure this workflow:
-#
-# 1. Ensure that your repository contains the necessary configuration for your Google Kubernetes Engine cluster, including deployment.yml, kustomization.yml, service.yml, etc.
-#
-# 2. Set up secrets in your workspace: GKE_PROJECT with the name of the project, GKE_EMAIL with the service account email, GKE_KEY with the Base64 encoded JSON service account key (https://github.com/GoogleCloudPlatform/github-actions/tree/docs/service-account-key/setup-gcloud#inputs).
-#
-# 3. Change the values for the GKE_ZONE, GKE_CLUSTER, IMAGE, REGISTRY_HOSTNAME and DEPLOYMENT_NAME environment variables (below).
-
-name: New full release to production with frontend.
+name: Create rc and qa env
 
 on:
   workflow_dispatch:
 
 env:
-  BUCKET_PATH:  static-cdn.workiz.com/fe/pre/latest
-  BUCKET_ROLLBACK_PATH:  static-cdn.workiz.com/fe/older
-  GITHUB_SHA: ${{ github.sha }}
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
   NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
   GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
-  AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}
-  AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}
-  GCP_REGION: us-central1
   GCP_ZONE: us-central1-b
-  MAILGUNKEY: ${{ github.MAILGUNKEY}}
-  TEMPLATE: backend-
   MIG:  preprod-ig
-  URL_MAP_NAME: backend-preprod-lb
-  BUCKET_PRE_PATH:  static-cdn.workiz.com/fe/pre/latest
-  API_PATH_MATCHER: path-matcher-7
-  APP_PATH_MATCHER: path-matcher-3
-  PREPROD_PATH_MATCHER: path-matcher-6
-  FIRST_GROUP: preprod-ig
-  SECOND_GROUP: preprod2-ig
-  MAX_RPS: 100
-  WORKIZ_INTERNAL_BE: workiz-interal-all-https
-  LONG_PROCESS_BE: long-proccess-api
-  AUTOSCALE_CPU: 0.35
-  COOL_DOWN_SECS: 120
-  MAX_REPLICAS: 20
-  MIN_REPLICAS: 1
-  PROD_DEFAULT_MIN_REPLICAS: 3
-  PROD_BE_BUCKET: be-assets-1
-  PREPROD_BE_BUCKET: be-assets-2
 
 jobs:
 
@@ -65,7 +30,7 @@ jobs:
       with:
         GITHUB_ACTOR: ${{ github.actor }}
 
-  create-release-branch:
+  create-rc-branch:
     outputs:
       branch: ${{ steps.branch.outputs.branch }}
     needs: [check-github-actor]
@@ -98,8 +63,8 @@ jobs:
         echo  ${{ env.BRANCH }}
         echo "::set-output name=branch::${{ env.BRANCH }}"
 
-  build-fe-preprod:
-    needs: [create-release-branch]
+  build-fe-rc:
+    needs: [create-rc-branch]
     name: build bundle.js & push to fe/pre/latest
     runs-on: ubuntu-latest
     steps:
@@ -141,12 +106,12 @@ jobs:
     #     curl https://us-central1-genial-runway-125805.cloudfunctions.net/build-version?env=preprod.workiz.com
 
   db-migrate:
-    needs: [create-release-branch]
+    needs: [create-rc-branch]
     name: db migrate RC MySQL
     # runs-on: backend-runner
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{needs.create-release-branch.outputs.branch}}
+      - run: echo ${{needs.create-rc-branch.outputs.branch}}
       # - uses: actions/checkout@v3
       # - name: Checkout shared actions
       #   uses: actions/checkout@v3
@@ -181,11 +146,11 @@ jobs:
       #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
 
   create-rc:
-    needs: [create-release-branch]
+    needs: [create-rc-branch]
     name: create RC from branch.
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{needs.create-release-branch.outputs.branch}}
+    - run: echo ${{needs.create-rc-branch.outputs.branch}}
     - name: Checkout
       uses: actions/checkout@v3
     - name: Checkout shared actions
@@ -201,7 +166,7 @@ jobs:
     - name: Create new environment
       if: success()
       run: | 
-        # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/recreate_rc.sh '${{needs.create-release-branch.outputs.branch}}'" --project=$GKE_CORE_PROJECT
+        # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/recreate_rc.sh '${{needs.create-rc-branch.outputs.branch}}'" --project=$GKE_CORE_PROJECT
     # - name: Send failure slack msg 
     #   if: failure()  
     #   uses: ./tmp/workiz-actions/slack-msg
@@ -212,11 +177,11 @@ jobs:
     #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
     #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'   
   update-qa:
-    needs: [create-release-branch]
+    needs: [create-rc-branch]
     name: update qa.workiz.com
     runs-on: ubuntu-latest
     steps:
-    - run: echo ${{needs.create-release-branch.outputs.branch}}
+    - run: echo ${{needs.create-rc-branch.outputs.branch}}
     # - name: Checkout
     #   uses: actions/checkout@v3
     # - name: Checkout shared actions
@@ -232,7 +197,7 @@ jobs:
     # - name: Create new environment
     #   if: success()
     #   run: | 
-    #     gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/qa-tag-pull.sh '${{needs.create-release-branch.outputs.branch}}'" --project=$GKE_CORE_PROJECT
+    #     gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/pull_qa.sh '${{needs.create-rc-branch.outputs.branch}}'" --project=$GKE_CORE_PROJECT
     # - name: Send failure slack msg 
     #   if: failure()  
     #   uses: ./tmp/workiz-actions/slack-msg
@@ -242,5 +207,26 @@ jobs:
     #     SUCCESS: false
     #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
     #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+
+  send-slack-msg:
+    needs: [create-rc-branch,update-qa,create-rc,db-migrate,build-fe-rc]
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: 'RC and qa got updated :charmander_dancing: \n you can start running automation'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
 
