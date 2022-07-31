@@ -1,17 +1,6 @@
 name: hot fix
 on:
   workflow_dispatch:
-    inputs:
-      # TAG_TYPE:
-      #   description: 'TAG_TYPE (v or rc) '
-      #   required: true
-      TAG_TYPE:
-        type: choice
-        description: TAG_TYPE (v or rc)
-        required: true
-        options: 
-        - v
-        - rc
 
 jobs:
   hot-fix:
@@ -24,13 +13,12 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: DEVOPS-423-workiz-actions-create-action-to-hf
+        ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
     - name: hot-fix  
       uses: ./tmp/workiz-actions/hot-fix
       env:
-        TAG_TYPE: ${{ inputs.TAG_TYPE }}
         GITHUB_ACTOR: ${{ github.actor }}
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
