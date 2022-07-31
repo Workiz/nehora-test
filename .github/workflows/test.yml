@@ -42,7 +42,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: Workiz/nehora
-        ref: workiz.com
+        ref: master
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/nehora
     - name: Send success slack msg 
