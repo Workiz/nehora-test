@@ -77,6 +77,8 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_REPOS }}
         path: ./
+    - name: ls
+      run: ls
     - uses: google-github-actions/auth@v0
       with:
         credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
