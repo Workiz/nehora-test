@@ -57,6 +57,7 @@ jobs:
       uses: ./tmp/workiz-actions/create-rc-branch
       with:
         GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
     - name: set branch output
       id: branch
       run: |
