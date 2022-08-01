@@ -384,6 +384,8 @@ jobs:
          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }} " \
           https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"$last_tag"}' |  jq .body)
         echo "NOTE=$NOTE" >> $GITHUB_ENV
+        echo "ENV NOTE ${{ env.NOTE }}"
+        echo "NOTE $NOTE"
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
@@ -395,7 +397,7 @@ jobs:
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
-        MESSAGE: $NOTE
+        MESSAGE: "$NOTE"
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
