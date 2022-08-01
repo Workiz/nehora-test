@@ -33,49 +33,6 @@ jobs:
       uses: ./tmp/workiz-actions/create-tag
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
-      # if: ${{ github.ref_name }} == "workiz.com"
-      # run: | 
-      #   if [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(rc.*)-branch$ ]] && [[ ! "${{env.BACKEND_BRANCH}}" =~ ^(v.*)-branch ]]; then
-      #     echo "branch must be rc or hot-fix branch"
-      #     exit 1
-      #   fi
-      #   echo ${{env.BACKEND_BRANCH}}
-      #   IFS='-' read -ra tag_name <<< "${{env.BACKEND_BRANCH}}"
-      #   tag_name=${tag_name[0]}
-      #   echo "$tag_name"
-      #   IFS='c' read -ra tag_name <<< "$tag_name"
-      #   tag_name=${tag_name[1]}
-      #   echo "$tag_name"
-      #   tag_name="v$tag_name"
-      #   # git tag -a $tag_name -m "$tag_name"
-      #   # git push origin $tag_name
-      #   echo "$tag_name"
-      #   git tag $tag_name
-      #   commit=$(git rev-parse HEAD)
-      #   git_refs_response=$(
-      #   curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/git/refs \
-      #   -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-      #   -d @- << EOF
-
-      #   {
-      #   "ref": "refs/tags/$tag_name",
-      #   "sha": "$commit"
-      #   }
-      #   EOF
-      #   )
-
-      #   git_ref_posted=$( echo "${git_refs_response}" | jq .ref | tr -d '"' )
-
-      #   echo "::debug::${git_refs_response}"
-      #   if [ "${git_ref_posted}" = "refs/tags/${tag_name}" ]; then
-      #   exit 0
-      #   else
-      #   echo "::error::Tag was not created properly."
-      #   exit 1
-      #   fi
-
-      #   cd ./tmp/frontend
-
 
   dyploy-preprod:
     needs: [create-tag]
