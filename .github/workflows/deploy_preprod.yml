@@ -51,7 +51,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
 
-  dyploy-preprod:
+  deploy-preprod:
     needs: [create-tag]
     name: dyploy-preprod
     runs-on: ubuntu-latest
@@ -59,7 +59,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-  dyploy-prod:
+  deploy-prod:
     needs: [create-tag,dyploy-preprod]
     name: dyploy-prod
     runs-on: ubuntu-latest
