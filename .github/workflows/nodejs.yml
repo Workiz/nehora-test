@@ -4,9 +4,8 @@
 name: Build Assets on new tag
 
 on:
-  push:
-    tags:
-    - '*'
+  workflow_dispatch:
+    
 # Environment variables available to all jobs and steps in this workflow
 env:
   BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest

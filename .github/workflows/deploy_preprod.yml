@@ -1,4 +1,4 @@
-name: create tag and deploy
+name: ☁️ deploy production
 on:
   workflow_dispatch:
 
