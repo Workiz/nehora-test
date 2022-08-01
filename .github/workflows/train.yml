@@ -82,11 +82,11 @@ jobs:
     # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v0'
-    - name: install correct node version
-      uses: actions/setup-node@v3
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
+    # - name: install correct node version
+    #   uses: actions/setup-node@v3
+    #   with:
+    #     node-version-file: '.nvmrc'
+    #     cache: 'npm'
     - name: use env.js for ci
       run: echo "mv env-ci.js env.js"
       # run: mv env-ci.js env.js
