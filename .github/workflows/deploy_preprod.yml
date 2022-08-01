@@ -368,7 +368,8 @@ jobs:
       env:
         SLACK_RELEASES: ${{ secrets.SLACK_RELEASES }}
         GH_TOKEN_REPOS: ${{ secrets.GH_TOKEN_REPOS }}
-      # run: .github/release.sh
+      run: |
+        # .github/release.sh
 
   send-slack-msg:
     needs: [deploy-prod]
