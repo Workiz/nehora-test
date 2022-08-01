@@ -55,7 +55,7 @@ jobs:
         path: ./tmp/workiz-actions
     - name: create branches 
       uses: ./tmp/workiz-actions/create-rc-branch
-      with:
+      env:
         GITHUB_ACTOR: ${{ github.actor }}
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
     - name: set branch output
