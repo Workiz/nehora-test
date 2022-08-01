@@ -11,6 +11,7 @@ env:
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
   GCP_ZONE: us-central1-b
   MIG:  preprod-ig
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
 
@@ -66,9 +67,9 @@ jobs:
     needs: [create-rc-branches-and-tags]
     name: build bundle.js & push to fe/pre/latest
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
+    # defaults:
+    #   run:
+    #     working-directory: frontend
     steps:
     - name: Checkout frontend
       uses: actions/checkout@v3
@@ -96,7 +97,7 @@ jobs:
     - name: unit test
       if: success()
       run: |
-        npm run test 
+        # npm run test 
     - name: build asset
       if: success()
       run: |
