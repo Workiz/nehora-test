@@ -76,7 +76,7 @@ jobs:
         repository: Workiz/frontend
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./
+        path: ./frontend
     - name: ls
       run: ls
     - uses: google-github-actions/auth@v0
