@@ -228,7 +228,7 @@ jobs:
       with:
         CHANNEL: 'nehora-test'
         MESSAGE: 'RC and qa got updated :charmander_dancing: \n you can start running automation'
-        SUCCESS: false
+        SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
