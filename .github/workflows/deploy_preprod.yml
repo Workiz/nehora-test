@@ -385,9 +385,11 @@ jobs:
           https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"$last_tag"}' |  jq .body)
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
+        NOTE=$(echo "$NOTE" | sed -r "s/[\']+//g")
         echo "NOTE=$NOTE" >> $GITHUB_ENV
         echo "ENV NOTE ${{ env.NOTE }}"
         echo "NOTE $NOTE"
+        
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
