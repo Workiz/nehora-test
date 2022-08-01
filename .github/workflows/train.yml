@@ -11,6 +11,7 @@ env:
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
   GCP_ZONE: us-central1-b
   MIG:  preprod-ig
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
 jobs:
 
@@ -96,7 +97,7 @@ jobs:
     - name: unit test
       if: success()
       run: |
-        npm run test 
+        # npm run test 
     - name: build asset
       if: success()
       run: |
