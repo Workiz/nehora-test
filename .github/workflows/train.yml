@@ -91,9 +91,8 @@ jobs:
       run: echo "mv env-ci.js env.js"
       # run: mv env-ci.js env.js
     - name: install npm modules with npm ci
-      run: |
-        cd frontend
-        npm ci
+      run: echo "npm ci"
+      # run: npm ci
     # - name: unit test
     #   if: success()
     #   run: |
