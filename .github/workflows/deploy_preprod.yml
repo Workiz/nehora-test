@@ -79,10 +79,10 @@ jobs:
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
-    - name: create-tag  
-      uses: ./tmp/workiz-actions/create-tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+    # - name: create-tag  
+    #   uses: ./tmp/workiz-actions/create-tag
+    #   env:
+    #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
 
   build-and-push-preprod-docker:
     name: Setup, Build, Publish, and Deploy
