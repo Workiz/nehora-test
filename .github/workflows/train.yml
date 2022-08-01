@@ -210,25 +210,25 @@ jobs:
   #   #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
   #   #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
-  # send-slack-msg:
-  #   needs: [create-rc-branch,update-qa,create-rc,db-migrate,build-fe-rc]
-  #   name: send slack msg
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout shared actions
-  #     uses: actions/checkout@v3
-  #     with:
-  #       repository: Workiz/workiz-actions
-  #       ref: workiz.com
-  #       token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-  #       path: ./tmp/workiz-actions
-  #   - name: Send failure slack msg 
-  #     uses: ./tmp/workiz-actions/slack-msg
-  #     with:
-  #       CHANNEL: 'nehora-test'
-  #       MESSAGE: 'RC and qa got updated :charmander_dancing: \n you can start running automation'
-  #       SUCCESS: false
-  #       WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-  #       LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+  send-slack-msg:
+    # needs: [create-rc-branch,update-qa,create-rc,db-migrate,build-fe-rc]
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: 'RC and qa got updated :charmander_dancing: \n you can start running automation'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
 

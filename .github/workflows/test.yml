@@ -30,9 +30,25 @@ jobs:
   #   steps:
   #     - name: test
   #       run: echo "hi"
+  check-github-actor:
+    name: check github actor
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: check github actor 
+      uses: ./tmp/workiz-actions/check-github-actor
+      with:
+        GITHUB_ACTOR: ${{ github.actor }}
 
   send-slack-msg:
     # needs: [create-rc,db-migrate]
+    needs: [check-github-actor]
     name: send slack msg
     runs-on: ubuntu-latest
     steps:
