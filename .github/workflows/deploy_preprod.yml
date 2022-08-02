@@ -385,7 +385,7 @@ jobs:
           https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"$last_tag"}' |  jq .body)
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
-        NOTE=$(echo "$NOTE" | sed -r "s/[\']+//g")
+        NOTE=$(echo "$NOTE" | sed -r "s/\'//g")
         # NOTE=$(echo "$NOTE" | sed -r "s/n\*/\n/g")
         # echo 'NOTE<<EOF' >> $GITHUB_ENV
         # echo "$NOTE" >> $GITHUB_ENV
