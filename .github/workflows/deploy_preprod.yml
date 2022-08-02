@@ -386,7 +386,7 @@ jobs:
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
         NOTE=$(echo "$NOTE" | sed -r "s/[\']+//g")
-        NOTE=$(echo "$NOTE" | sed -r "s/n\*/\n/g")
+        # NOTE=$(echo "$NOTE" | sed -r "s/n\*/\n/g")
         # echo 'NOTE<<EOF' >> $GITHUB_ENV
         # echo "$NOTE" >> $GITHUB_ENV
         # echo 'EOF' >> $GITHUB_ENV

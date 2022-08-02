@@ -37,8 +37,18 @@
 #         echo "new tag $new_tag"
 #         branch="rc$new_tag-branch"
 #         echo "branch $branch"
-current_branch="rc3.329-branch"
-if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
-          echo "branch must be rc branch"
-          exit 1
-        fi
+# current_branch="rc3.329-branch"
+# if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
+#           echo "branch must be rc branch"
+#           exit 1
+#         fi
+
+NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"  \
+         -H "Authorization: token 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 " \
+          https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"v3.337"}' |  jq .body)
+        NOTE="${NOTE%\"}"
+        NOTE="${NOTE#\"}"
+        echo $NOTE > test1.txt
+        NOTE=$(echo "$NOTE" | sed -r "s/[\']+//g")
+        NOTE=$(echo "$NOTE" | sed -r "s/n\*/\n/g")
+        echo $NOTE > test.txt

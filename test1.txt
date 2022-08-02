@@ -1,0 +1,1 @@
+## What's Changed\n* Rc3.336 branch by @nehoramoshe in https://github.com/Workiz/nehora-test/pull/8\n\n\n**Full Changelog**: https://github.com/Workiz/nehora-test/compare/v3.336...v3.337
