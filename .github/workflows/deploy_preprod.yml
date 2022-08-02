@@ -386,7 +386,7 @@ jobs:
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
         NOTE=$(echo "$NOTE" | sed -r "s/[\']+//g")
-        NOTE=$(echo "$NOTE" | sed -r "s/n\*/\\n/g")
+        # NOTE=$(echo "$NOTE" | sed -r "s/n\*/\\n/g")
         echo "NOTE=$NOTE" >> $GITHUB_ENV
         echo "ENV NOTE ${{ env.NOTE }}"
         echo "NOTE $NOTE"
@@ -406,7 +406,7 @@ jobs:
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
-        MESSAGE: '${{ env.NOTE }}'
+        MESSAGE: 'echo "${{env.NOTE}}" | sed -r "s/n\*/\\n/g"'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
