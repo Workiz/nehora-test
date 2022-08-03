@@ -38,12 +38,6 @@ jobs:
     steps:
       - name: Checkout backend
         uses: actions/checkout@v3
-      - name: get backend last tag
-        run: |
-          git config --global --add safe.directory /github/workspace
-          git fetch --tags
-          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
-          echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV 
       - name: create backend release
         run: | 
           git config --global --add safe.directory /github/workspace
