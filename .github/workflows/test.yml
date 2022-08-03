@@ -7,7 +7,9 @@ jobs:
   send-slack-msg:
     name: send slack msg
     runs-on: ubuntu-latest
-    steps:     
+    steps: 
+    - name: Checkout backend
+      uses: actions/checkout@v3    
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
@@ -15,8 +17,6 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: Checkout backend
-      uses: actions/checkout@v3
     - name: get last tag
       run: |
         git config --global --add safe.directory /github/workspace
