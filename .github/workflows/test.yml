@@ -1,4 +1,4 @@
-name: hot fix
+name: test
 on:
   workflow_dispatch:
 
