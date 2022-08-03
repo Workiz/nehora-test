@@ -65,7 +65,7 @@ jobs:
       - name: Checkout frontend
         uses: actions/checkout@v3
         with:
-          repository: Workiz/frontend
+          repository: Workiz/nehora
           ref: workiz.com
           token: ${{ secrets.GH_TOKEN_REPOS }}
           path: ./
