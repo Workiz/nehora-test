@@ -1,39 +1,13 @@
-name: Build rc from tag
-
-on:      
+name: hot fix
+on:
   workflow_dispatch:
-    inputs:
-      manual_tag:
-        description: 'Enter tag.'     
-        required: false
-env:
-  GCP_REGION: us-central1
-  GCP_ZONE: us-central1-b
-  GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
-  MANUAL_TAG: ${{github.event.inputs.manual_tag}}
-  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
-  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
-  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
 
 jobs:
 
-  # db-migrate:
-  #   name: db migrate RC MySQL
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: test
-  #       run: echo "db-migrate"
-
-  # create-rc:
-  #   name: create-rc
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: test
-  #       run: echo "hi"
-  check-github-actor:
-    name: check github actor
+  send-slack-msg:
+    name: send slack msg
     runs-on: ubuntu-latest
-    steps:
+    steps:     
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
@@ -41,37 +15,82 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: check github actor 
-      uses: ./tmp/workiz-actions/check-github-actor
+    - name: Checkout backend
+      uses: actions/checkout@v3
+    - name: get last tag
+      run: |
+        git config --global --add safe.directory /github/workspace
+        git fetch --tags
+        LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
+        echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
       with:
-        GITHUB_ACTOR: ${{ github.actor }}
-
-  send-slack-msg:
-    # needs: [create-rc,db-migrate]
-    needs: [check-github-actor]
-    name: send slack msg
+        CHANNEL: 'nehora'
+        MESSAGE: 'A new version released to production with {{ env.LAST_TAG }}, great job everybody! :muscle: :v: '
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+  create-release:
+    name: create-release-from-tag
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/frontend
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/frontend
-    - name: Send success slack msg 
-      run: |
-       cd ./tmp/frontend
-       ls
-       git config --global --add safe.directory /github/workspace
-       git status
-      # if: success() 
-      # uses: ./tmp/workiz-actions/slack-msg
-      # with:
-      #   CHANNEL: 'nehora-test'
-      #   MESSAGE: '*qa.workiz.com got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: \n *RC got updated with ${{env.MANUAL_TAG}}* :charmander_dancing: '
-      #   SUCCESS: true
-      #   WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-      #   LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+      - name: Checkout backend
+        uses: actions/checkout@v3
+      - name: get backend last tag
+        run: |
+          git config --global --add safe.directory /github/workspace
+          git fetch --tags
+          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
+          echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV 
+      - name: create backend release
+        run: | 
+          git_refs_response=$(
+          curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/releases \
+          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
+          -d @- << EOF
+          {
+          "tag_name":"{{ env.LAST_TAG }}"
+          }
+          EOF
+          )
+          git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
+          echo "::debug::${git_refs_response}"
+          if [ "${git_ref_posted}" = "{{ env.LAST_TAG }}" ]; then
+          echo "backend release created"
+          else
+          echo "::error::backend Realse was not created properly."
+          exit 1
+          fi
+      - name: Checkout frontend
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/frontend
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_REPOS }}
+          path: ./
+      - name: get frontend last tag
+        run: |
+          git config --global --add safe.directory /github/workspace
+          git fetch --tags
+          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
+          echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV 
+      - name: create frontend release
+        run: | 
+          git_refs_response=$(
+          curl -s -X POST https://api.github.com/repos/Workiz/nehora/releases \
+          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
+          -d @- << EOF
+          {
+          "tag_name":"{{ env.LAST_TAG }}"
+          }
+          EOF
+          )
+          git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
+          echo "::debug::${git_refs_response}"
+          if [ "${git_ref_posted}" = "{{ env.LAST_TAG }}" ]; then
+          echo "frontend release created"
+          else
+          echo "::error::frontend Realse was not created properly."
+          exit 1
+          fi
