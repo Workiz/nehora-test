@@ -1,0 +1,234 @@
+name: 🚅 train
+
+on:
+  workflow_dispatch:
+
+env:
+  BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
+  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
+  GKE_CORE_PROJECT: ${{ secrets.GKE_PROJECT_CORE }}
+  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+  GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
+  GCP_ZONE: us-central1-b
+  MIG:  preprod-ig
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+jobs:
+
+  check-github-actor:
+    name: check github actor
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: check github actor 
+      uses: ./tmp/workiz-actions/check-github-actor
+      with:
+        GITHUB_ACTOR: ${{ github.actor }}
+
+  create-rc-branches-and-tags:
+    outputs:
+      branch: ${{ steps.branch.outputs.branch }}
+    needs: [check-github-actor]
+    name: create frontend and backend branches and tags
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout nehora
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/nehora
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/nehora
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/workiz-actions
+    - name: create branches 
+      uses: ./tmp/workiz-actions/create-rc-branches-and-tags
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+    - name: set branch output
+      id: branch
+      run: |
+        echo "::set-output name=branch::${{ env.BRANCH }}"
+
+  build-fe-rc:
+    needs: [create-rc-branches-and-tags]
+    name: build bundle.js & push to fe/pre/latest
+    runs-on: ubuntu-latest
+    # defaults:
+    #   run:
+    #     working-directory: frontend
+    steps:
+    - name: Checkout frontend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/frontend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./
+    - uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v0'
+      
+    - name: install correct node version
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: use env.js for ci
+      run: mv env-ci.js env.js
+    - name: install npm modules with npm ci
+      run: npm ci
+    - name: unit test
+      if: success()
+      run: |
+        # npm run test 
+    - name: build asset
+      if: success()
+      run: |
+        npm run build-ci
+    # Rollout to Ig
+    # - name: deploy
+    #   if: success()
+    #   run: |
+    #     gsutil -m cp -z js /var/tmp/bundle.js* gs://$BUCKET_PATH/    
+    #     curl https://us-central1-genial-runway-125805.cloudfunctions.net/build-version?env=preprod.workiz.com
+
+  db-migrate:
+    needs: [create-rc-branches-and-tags]
+    name: db migrate RC MySQL
+    # runs-on: backend-runner
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo ${{needs.create-rc-branches-and-tags.outputs.branch}}
+      # - uses: actions/checkout@v3
+      # - name: Checkout shared actions
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: Workiz/workiz-actions
+      #     ref: workiz.com
+      #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      #     path: ./tmp/workiz-actions
+      # - name: Checkout shared actions
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: Workiz/workiz-actions
+      #     ref: workiz.com
+      #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      #     path: ./tmp/workiz-actions
+      # - name: Run flyway migrate
+      #   uses: ./tmp/workiz-actions/flyway
+      #   with:
+      #     url: "jdbc:mysql://${{ env.MYSQL_HOST }}:3306/sendajobprod"
+      #     user: ${{ env.MYSQL_USER }}
+      #     password: ${{ env.MYSQL_PW }}
+      #     locations: filesystem:./conf/db_migrations/sql
+      #     command: migrate
+      # - name: Send failure slack msg 
+      #   if: failure()  
+      #   uses: ./tmp/workiz-actions/slack-msg
+      #   with:
+      #     CHANNEL: 'release-committee'
+      #     MESSAGE: 'db migrate on rc database failed :sob:'
+      #     SUCCESS: false
+      #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+      #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
+
+  create-rc:
+    needs: [create-rc-branches-and-tags]
+    name: create RC from branch.
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo ${{needs.create-rc-branches-and-tags.outputs.branch}}
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - uses: google-github-actions/auth@v0
+      with:
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    - name: Create new environment
+      if: success()
+      run: | 
+        # gcloud compute ssh root@sajdev-rc  --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/recreate_rc.sh '${{needs.create-rc-branches-and-tags.outputs.branch}}'" --project=$GKE_CORE_PROJECT
+    # - name: Send failure slack msg 
+    #   if: failure()  
+    #   uses: ./tmp/workiz-actions/slack-msg
+    #   with:
+    #     CHANNEL: 'release-committee'
+    #     MESSAGE: 'RC failed to update :sob:'
+    #     SUCCESS: false
+    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'   
+  update-qa:
+    needs: [create-rc-branches-and-tags]
+    name: update qa.workiz.com
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo ${{needs.create-rc-branches-and-tags.outputs.branch}}
+    # - name: Checkout
+    #   uses: actions/checkout@v3
+    # - name: Checkout shared actions
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/workiz-actions
+    #     ref: workiz.com
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    #     path: ./tmp/workiz-actions
+    # - uses: google-github-actions/auth@v0
+    #   with:
+    #     credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # - name: Create new environment
+    #   if: success()
+    #   run: | 
+    #     gcloud compute ssh root@sajdev --zone=${GCP_ZONE} --command "sudo bash /var/infra/scripts/backend-rc/pull_qa.sh '${{needs.create-rc-branches-and-tags.outputs.branch}}'" --project=$GKE_CORE_PROJECT
+    # - name: Send failure slack msg 
+    #   if: failure()  
+    #   uses: ./tmp/workiz-actions/slack-msg
+    #   with:
+    #     CHANNEL: 'release-committee'
+    #     MESSAGE: 'qa.workiz.com failed to update :sob:'
+    #     SUCCESS: false
+    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+
+  send-slack-msg:
+    needs: [check-github-actor,create-rc-branches-and-tags,update-qa,create-rc,db-migrate,build-fe-rc]
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: 'RC and qa got updated :charmander_dancing: \n you can start running automation'
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'

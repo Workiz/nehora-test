@@ -1,11 +1,10 @@
-name: Create tag
+name: hot fix
 on:
   workflow_dispatch:
 
-
 jobs:
-  create-tag:
-    name: create-tag
+  hot-fix:
+    name: hot-fix
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -18,7 +17,8 @@ jobs:
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
-    - name: create-tag  
-      uses: ./tmp/workiz-actions/create-tag
+    - name: hot-fix  
+      uses: ./tmp/workiz-actions/hot-fix
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
