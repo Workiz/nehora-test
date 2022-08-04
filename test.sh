@@ -37,8 +37,12 @@
 #         echo "new tag $new_tag"
 #         branch="rc$new_tag-branch"
 #         echo "branch $branch"
-current_branch="rc3.329-branch"
-if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
-          echo "branch must be rc branch"
-          exit 1
-        fi
+# current_branch="rc3.329-branch"
+# if [[ ! "$current_branch" =~ ^(rc.*)-branch$ ]]; then
+#           echo "branch must be rc branch"
+#           exit 1
+#         fi
+
+if [[ "v3.333" =~ ^v[0-9]+\.[0-9]+$ ]]; then
+  echo "here"
+fi
