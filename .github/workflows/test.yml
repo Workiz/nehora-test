@@ -34,7 +34,7 @@ jobs:
     - name: Send failure slack msg 
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'nehora'
+        CHANNEL: 'nehora-test'
         MESSAGE: '${{env.NOTE}}'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
