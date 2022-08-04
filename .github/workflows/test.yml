@@ -29,13 +29,13 @@ jobs:
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
         echo "NOTE=$NOTE" >> $GITHUB_ENV
-        echo "{{env.NOTE}}"
+        echo "${{env.NOTE}}"
         echo "$NOTE"
     - name: Send failure slack msg 
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
-        MESSAGE: '"$NOTE"'
+        MESSAGE: '${{env.NOTE}}'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
