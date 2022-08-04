@@ -24,69 +24,72 @@ jobs:
         LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
         echo $LAST_TAG
         echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV
+        NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token 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"   https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"v3.337"}' |  jq .body)
+        NOTE=${NOTE//\'/}
+        echo "NOTE=$NOTE" >> $GITHUB_ENV
     - name: Send failure slack msg 
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
-        MESSAGE: 'A new version released to production with ${{ env.LAST_TAG }}, great job everybody! :muscle: :v: '
+        MESSAGE: '{{env.NOTE}}'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
-  create-release:
-    name: create-release-from-tag
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout backend
-        uses: actions/checkout@v3
-      - name: create backend release
-        run: | 
-          git config --global --add safe.directory /github/workspace
-          git fetch --tags
-          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1)
-          git_refs_response=$(
-          curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/releases \
-          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
-          -d @- << EOF
-          {
-          "tag_name":"$LAST_TAG"
-          }
-          EOF
-          )
-          git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
-          echo "::debug::${git_refs_response}"
-          if [ "${git_ref_posted}" = "$LAST_TAG" ]; then
-          echo "backend release created"
-          else
-          echo "::error::backend Realse was not created properly."
-          exit 1
-          fi
-      - name: Checkout frontend
-        uses: actions/checkout@v3
-        with:
-          repository: Workiz/nehora
-          ref: workiz.com
-          token: ${{ secrets.GH_TOKEN_REPOS }}
-          path: ./ 
-      - name: create frontend release
-        run: | 
-          git config --global --add safe.directory /github/workspace
-          git fetch --tags
-          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
-          echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV 
-          git_refs_response=$(
-          curl -s -X POST https://api.github.com/repos/Workiz/nehora/releases \
-          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
-          -d @- << EOF
-          {
-          "tag_name":"$LAST_TAG"
-          }
-          EOF
-          )
-          git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
-          echo "::debug::${git_refs_response}"
-          if [ "${git_ref_posted}" = "$LAST_TAG" ]; then
-          echo "frontend release created"
-          else
-          echo "::error::frontend Realse was not created properly."
-          exit 1
-          fi
+  # create-release:
+  #   name: create-release-from-tag
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout backend
+  #       uses: actions/checkout@v3
+  #     - name: create backend release
+  #       run: | 
+  #         git config --global --add safe.directory /github/workspace
+  #         git fetch --tags
+  #         LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1)
+  #         git_refs_response=$(
+  #         curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/releases \
+  #         -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
+  #         -d @- << EOF
+  #         {
+  #         "tag_name":"$LAST_TAG"
+  #         }
+  #         EOF
+  #         )
+  #         git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
+  #         echo "::debug::${git_refs_response}"
+  #         if [ "${git_ref_posted}" = "$LAST_TAG" ]; then
+  #         echo "backend release created"
+  #         else
+  #         echo "::error::backend Realse was not created properly."
+  #         exit 1
+  #         fi
+  #     - name: Checkout frontend
+  #       uses: actions/checkout@v3
+  #       with:
+  #         repository: Workiz/nehora
+  #         ref: workiz.com
+  #         token: ${{ secrets.GH_TOKEN_REPOS }}
+  #         path: ./ 
+  #     - name: create frontend release
+  #       run: | 
+  #         git config --global --add safe.directory /github/workspace
+  #         git fetch --tags
+  #         LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
+  #         echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV 
+  #         git_refs_response=$(
+  #         curl -s -X POST https://api.github.com/repos/Workiz/nehora/releases \
+  #         -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
+  #         -d @- << EOF
+  #         {
+  #         "tag_name":"$LAST_TAG"
+  #         }
+  #         EOF
+  #         )
+  #         git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
+  #         echo "::debug::${git_refs_response}"
+  #         if [ "${git_ref_posted}" = "$LAST_TAG" ]; then
+  #         echo "frontend release created"
+  #         else
+  #         echo "::error::frontend Realse was not created properly."
+  #         exit 1
+  #         fi

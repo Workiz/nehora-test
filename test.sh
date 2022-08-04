@@ -43,6 +43,10 @@
 #           exit 1
 #         fi
 
-if [[ "v3.333" =~ ^v[0-9]+\.[0-9]+$ ]]; then
-  echo "here"
-fi
+# if [[ "v3.333" =~ ^v[0-9]+\.[0-9]+$ ]]; then
+#   echo "here"
+# fi
+
+NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token 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"   https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"v3.337"}' |  jq .body)
+NOTE=${NOTE//\'/}
+echo $NOTE
