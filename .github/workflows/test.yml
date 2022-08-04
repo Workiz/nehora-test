@@ -24,7 +24,7 @@ jobs:
         LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1) 
         echo $LAST_TAG
         echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV
-        NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}"   https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"$LAST_TAG"}' |  jq .body)
+        NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}"   https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"'$LAST_TAG'"}' |  jq .body)
         NOTE=${NOTE//\'/}
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
