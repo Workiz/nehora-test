@@ -52,3 +52,4 @@ NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"  \
         NOTE=$(echo "$NOTE" | sed -r "s/[\']//g")
         # NOTE=$(echo "$NOTE" | sed -r "s/n\*/\n/g")
         echo $NOTE > test.txt
+
