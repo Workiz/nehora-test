@@ -40,6 +40,7 @@ jobs:
         NOTE="${NOTE%\"}"
         NOTE="${NOTE#\"}"
         NOTE=${NOTE//\'/}
+        NOTE=${NOTE//\*/•}
         cd ./tmp/frontend
         git config --global --add safe.directory /github/workspace/tmp/frontend
         git fetch --tags
@@ -49,9 +50,10 @@ jobs:
         NOTE2="${NOTE2%\"}"
         NOTE2="${NOTE2#\"}"
         NOTE2=${NOTE2//\'/}
+        NOTE2=${NOTE2//\*/•}
         echo "*backend* NOTE2 *frontend* $NOTE2"
         NOTE=":php: *backend* \n$NOTE \n:react: *frontend* \n$NOTE2 "
-        NOTE=${NOTE//\*/•}
+        # NOTE=${NOTE//\*/•}
         echo "NOTE=$NOTE" >> $GITHUB_ENV
         echo "env NOTE ${{env.NOTE}}"
         echo "NOTE $NOTE"
