@@ -52,7 +52,7 @@ jobs:
         NOTE2=${NOTE2//\'/}
         NOTE2=${NOTE2//\*/•}
         echo "*backend* NOTE2 *frontend* $NOTE2"
-        NOTE=":php: *backend* \n$NOTE \n:react: *frontend* \n$NOTE2 "
+        NOTE=":php: *backend* \n$NOTE \n\n:react: *frontend* \n$NOTE2 "
         # NOTE=${NOTE//\*/•}
         echo "NOTE=$NOTE" >> $GITHUB_ENV
         echo "env NOTE ${{env.NOTE}}"
@@ -61,7 +61,7 @@ jobs:
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora-test'
-        MESSAGE: 'we are realesed a new version to production \n ${{env.NOTE}}'
+        MESSAGE: '*we are realesed a new version to production\nDevelopers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change :thumbsup:* \n ${{env.NOTE}}'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
