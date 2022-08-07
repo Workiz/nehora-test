@@ -22,3 +22,5 @@ jobs:
       env:
         GITHUB_ACTOR: ${{ github.actor }}
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+
+        
