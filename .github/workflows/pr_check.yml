@@ -1,10 +1,10 @@
-name: PR Lint New
+name: PR Lint
 on:
   pull_request:
     types: [opened, edited, reopened]
 
 jobs:
-  test:
+  pr-lint:
     name: check pr
     runs-on: ubuntu-latest
     steps:
