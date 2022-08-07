@@ -47,6 +47,7 @@
 #   echo "here"
 # fi
 
-NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token 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"   https://api.github.com/repos/Workiz/nehora-test/releases/generate-notes -d '{"tag_name":"v3.337"}' |  jq .body)
+NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token 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"   https://api.github.com/repos/Workiz/backend/releases/generate-notes -d '{"tag_name":"v3.337"}' |  jq .body)
 NOTE=${NOTE//\'/}
+NOTE=${NOTE//\*/•}
 echo $NOTE
