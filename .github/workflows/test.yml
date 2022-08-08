@@ -60,12 +60,12 @@ jobs:
     - name: Send failure slack msg 
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'nehora'
+        CHANNEL: 'releases'
         MESSAGE: '*A new version released to production with ${{ env.LAST_TAG }}, great job everybody! :muscle: :v:* \n*Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :thumbsup: \n ${{env.NOTE}}'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
-        
+
   # create-release:
   #   name: create-release-from-tag
   #   runs-on: ubuntu-latest
