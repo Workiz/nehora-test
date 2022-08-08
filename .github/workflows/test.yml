@@ -65,6 +65,7 @@ jobs:
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+        
   # create-release:
   #   name: create-release-from-tag
   #   runs-on: ubuntu-latest
