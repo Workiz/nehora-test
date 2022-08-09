@@ -61,11 +61,11 @@
 
 LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2) 
 
-IFS=$'\n' read -rd '' -a RES <<<"$LAST_TAGS"
+IFS=$'\n' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
 
 # IFS='/\n' read -ra RES <<< "$LAST_TAGS"# echo "$LAST_TAGS"
 # mails=$(echo $IN | tr ";" "\n")
 
 # echo "LAST_TAGS $RES"
-echo "1 ${RES[0]}"
-echo "2 ${RES[1]}"
+echo "1 ${LAST_TAGS[0]}"
+echo "2 ${LAST_TAGS[1]}"
