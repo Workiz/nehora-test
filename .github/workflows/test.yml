@@ -49,57 +49,60 @@ jobs:
           LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*" | tail -2) 
         fi
         echo "last tags $LAST_TAGS"
-        if [[ "$LAST_TAGS" =~ ^(v.*).*\n(v.*)$ ]]; then
+        if [[ "$LAST_TAGS" =~ ^(v.*).*(v.*)$ ]]; then
           echo "1 ${BASH_REMATCH[1]}"
           echo "2 ${BASH_REMATCH[2]}"
         fi
-    #     # IFS='.' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
-    #     echo "****backend******"
-    #     # if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
-    #     #   echo "${BASH_REMATCH[1]}"
-    #     #   git checkout workiz.com
-    #     #   git push origin --delete rc${BASH_REMATCH[1]}-branch
-    #     # fi
-    #     NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}"   https://api.github.com/repos/Workiz/backend/releases/generate-notes -d '{"tag_name":"'${LAST_TAGS[0]}'","previous_tag_name":"'${LAST_TAGS[1]}'"}' |  jq .body)
-    #     NOTE="${NOTE%\"}"
-    #     NOTE="${NOTE#\"}"
-    #     NOTE=${NOTE//\'/}
-    #     NOTE=${NOTE//\*/•}
-    #     cd ./tmp/frontend
-    #     git config --global --add safe.directory /github/workspace/tmp/frontend
-    #     git fetch --all
-    #     if [[ "$current_branch" =~ ^rc.* ]]; then
-    #       LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2) 
-    #     else
-    #       LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*" | tail -2) 
-    #     fi
-    #     echo "last tags $LAST_TAGS"
-    #     IFS=$'\n' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
-    #     echo "**** frontend ****"
-    #     # if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
-    #     #   echo "${BASH_REMATCH[1]}"
-    #     #   git checkout workiz.com
-    #     #   git push origin --delete rc${BASH_REMATCH[1]}-branch 
-    #     # fi
-    #     NOTE2=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}"   https://api.github.com/repos/Workiz/frontend/releases/generate-notes -d '{"tag_name":"'${LAST_TAGS[0]}'","previous_tag_name":"'${LAST_TAGS[1]}'"}' |  jq .body)
-    #     NOTE2="${NOTE2%\"}"
-    #     NOTE2="${NOTE2#\"}"
-    #     NOTE2=${NOTE2//\'/}
-    #     NOTE2=${NOTE2//\*/•}
-    #     echo "*backend* NOTE2 *frontend* $NOTE2"
-    #     NOTE=":php: *backend* \n$NOTE \n\n:react: *frontend* \n$NOTE2 "
-    #     # NOTE=${NOTE//\*/•}
-    #     echo "NOTE=$NOTE" >> $GITHUB_ENV
-    #     echo "env NOTE ${{env.NOTE}}"
-    #     echo "NOTE $NOTE"
-    # - name: Send failure slack msg 
-    #   uses: ./tmp/workiz-actions/slack-msg
-    #   with:
-    #     CHANNEL: 'nehora'
-    #     MESSAGE: '*A new version released to production with ${{ env.LAST_TAG }}, great job everybody! :muscle: :v:* \n*Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :thumbsup: \n ${{env.NOTE}}'
-    #     SUCCESS: true
-    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-    #     LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+        # IFS='.' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
+        echo "****backend******"
+        # if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
+        #   echo "${BASH_REMATCH[1]}"
+        #   git checkout workiz.com
+        #   git push origin --delete rc${BASH_REMATCH[1]}-branch
+        # fi
+        NOTE=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}"   https://api.github.com/repos/Workiz/backend/releases/generate-notes -d '{"tag_name":"'${BASH_REMATCH[1]}'","previous_tag_name":"'${BASH_REMATCH[2]}'"}' |  jq .body)
+        NOTE="${NOTE%\"}"
+        NOTE="${NOTE#\"}"
+        NOTE=${NOTE//\'/}
+        NOTE=${NOTE//\*/•}
+        cd ./tmp/frontend
+        git config --global --add safe.directory /github/workspace/tmp/frontend
+        git fetch --all
+        if [[ "$current_branch" =~ ^rc.* ]]; then
+          LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2) 
+        else
+          LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*" | tail -2) 
+        fi
+        echo "last tags $LAST_TAGS"
+        if [[ "$LAST_TAGS" =~ ^(v.*).*(v.*)$ ]]; then
+          echo "1 ${BASH_REMATCH[1]}"
+          echo "2 ${BASH_REMATCH[2]}"
+        fi
+        echo "**** frontend ****"
+        # if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
+        #   echo "${BASH_REMATCH[1]}"
+        #   git checkout workiz.com
+        #   git push origin --delete rc${BASH_REMATCH[1]}-branch 
+        # fi
+        NOTE2=$(curl  -X POST  -H "Accept: application/vnd.github+json"   -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}"   https://api.github.com/repos/Workiz/frontend/releases/generate-notes -d '{"tag_name":"'${BASH_REMATCH[1]}'","previous_tag_name":"'${BASH_REMATCH[2]}'"}' |  jq .body)
+        NOTE2="${NOTE2%\"}"
+        NOTE2="${NOTE2#\"}"
+        NOTE2=${NOTE2//\'/}
+        NOTE2=${NOTE2//\*/•}
+        echo "*backend* NOTE2 *frontend* $NOTE2"
+        NOTE=":php: *backend* \n$NOTE \n\n:react: *frontend* \n$NOTE2 "
+        # NOTE=${NOTE//\*/•}
+        echo "NOTE=$NOTE" >> $GITHUB_ENV
+        echo "env NOTE ${{env.NOTE}}"
+        echo "NOTE $NOTE"
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora'
+        MESSAGE: '*A new version released to production with ${{ env.LAST_TAG }}, great job everybody! :muscle: :v:* \n*Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :thumbsup: \n ${{env.NOTE}}'
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
 
   # create-release:
   #   name: create-release-from-tag

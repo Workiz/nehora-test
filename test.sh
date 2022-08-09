@@ -61,11 +61,18 @@
 
 LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2) 
 
-IFS=$'\n' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
+# IFS=$'\n' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
 
-# IFS='/\n' read -ra RES <<< "$LAST_TAGS"# echo "$LAST_TAGS"
-# mails=$(echo $IN | tr ";" "\n")
+# # IFS='/\n' read -ra RES <<< "$LAST_TAGS"# echo "$LAST_TAGS"
+# # mails=$(echo $IN | tr ";" "\n")
 
-# echo "LAST_TAGS $RES"
-echo "1 ${LAST_TAGS[0]}"
-echo "2 ${LAST_TAGS[1]}"
+# # echo "LAST_TAGS $RES"
+# echo "1 ${LAST_TAGS[0]}"
+# echo "2 ${LAST_TAGS[1]}"
+
+echo "last tags $LAST_TAGS"
+if [[ "$LAST_TAGS" =~ ^(v.*).*(v.*)$ ]]; then
+  echo "1 ${BASH_REMATCH[1]}"
+  echo "2 ${BASH_REMATCH[2]}"
+fi
+echo "1 ${BASH_REMATCH[1]}"
