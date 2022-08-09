@@ -6,7 +6,7 @@ jobs:
 
   send-slack-msg:
     name: send slack msg
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps: 
       # - name: Checkout 
       #   uses: actions/checkout@v3
@@ -41,13 +41,15 @@ jobs:
         git config --global --add safe.directory /github/workspace
         git fetch --all
         current_branch=$(git rev-parse --abbrev-ref HEAD)
+        echo "vurrent branch $current_branch"
         if [[ "$current_branch" =~ ^rc.* ]]; then
+          echo "rc branch"
           LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2) 
         else
           LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*" | tail -2) 
         fi
         echo "last tags $LAST_TAGS"
-        IFS=$'\n' read -ra LAST_TAGS <<<"$LAST_TAGS"
+        IFS=$'\n' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
         echo "****backend******"
         # if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
         #   echo "${BASH_REMATCH[1]}"
