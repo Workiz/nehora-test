@@ -50,8 +50,8 @@ jobs:
         fi
         echo "last tags $LAST_TAGS"
         if [[ "$LAST_TAGS" =~ ^(v[a-z0-9\.\-]*).*(v[a-z0-9\.\-]*)$ ]]; then
-          LAST_TAG=${BASH_REMATCH[1]}
-          PREV_TAG=${BASH_REMATCH[2]}
+          LAST_TAG=${BASH_REMATCH[2]}
+          PREV_TAG=${BASH_REMATCH[1]}
           echo "1 ${BASH_REMATCH[1]}"
           echo "2 ${BASH_REMATCH[2]}"
         fi
