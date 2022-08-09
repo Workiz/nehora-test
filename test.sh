@@ -70,8 +70,8 @@ LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2)
 # echo "1 ${LAST_TAGS[0]}"
 # echo "2 ${LAST_TAGS[1]}"
 
-echo "last tags $LAST_TAGS"
-if [[ "$LAST_TAGS" =~ ^(v.*).*(v.*)$ ]]; then
+echo "$LAST_TAGS"
+if [[ "$LAST_TAGS" =~ ^(v[a-z0-9\.\-]*).*(v[a-z0-9\.\-]*)$ ]]; then
   echo "1 ${BASH_REMATCH[1]}"
   echo "2 ${BASH_REMATCH[2]}"
 fi
