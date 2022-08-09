@@ -10,7 +10,8 @@ jobs:
     steps: 
       - run: |
           git config --global --add safe.directory /github/workspace
-          git push origin --delete test-hf
+          git fetch --all
+          git push origin --delete test
 
     # - name: Checkout backend
     #   uses: actions/checkout@v3
