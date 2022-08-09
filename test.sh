@@ -52,9 +52,20 @@
 # NOTE=${NOTE//\*/•}
 # echo $NOTE
 
-LAST_RC_TAG=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1) 
-if [[ "$LAST_RC_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
-  echo "${BASH_REMATCH[1]}"
-  git branch --delete rc${BASH_REMATCH[1]}-branch
-fi
+# LAST_RC_TAG=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -1) 
+# if [[ "$LAST_RC_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
+#   echo "${BASH_REMATCH[1]}"
+#   git branch --delete rc${BASH_REMATCH[1]}-branch
+# fi
 # git branch --delete $LAST_RC_TAG-branch
+
+LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2) 
+
+IFS=$'\n' read -rd '' -a RES <<<"$LAST_TAGS"
+
+# IFS='/\n' read -ra RES <<< "$LAST_TAGS"# echo "$LAST_TAGS"
+# mails=$(echo $IN | tr ";" "\n")
+
+# echo "LAST_TAGS $RES"
+echo "1 ${RES[0]}"
+echo "2 ${RES[1]}"
