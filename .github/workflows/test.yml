@@ -8,7 +8,9 @@ jobs:
     name: send slack msg
     runs-on: ubuntu-latest
     steps: 
-      - run: git push origin --delete test-hf
+      - run: |
+          git config --global --add safe.directory /github/workspace
+          git push origin --delete test-hf
 
     # - name: Checkout backend
     #   uses: actions/checkout@v3
