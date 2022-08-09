@@ -46,9 +46,9 @@ jobs:
         else
           LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*" | tail -2) 
         fi
-        echo $LAST_TAGS
+        echo "lst tags $LAST_TAGS"
         echo "LAST_TAG=$LAST_TAG" >> $GITHUB_ENV
-        IFS=' ' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
+        IFS=$' ' read -rd '' -a LAST_TAGS <<<"$LAST_TAGS"
         echo "****backend******"
         # if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
         #   echo "${BASH_REMATCH[1]}"
