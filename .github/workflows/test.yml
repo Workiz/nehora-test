@@ -92,7 +92,7 @@ jobs:
     - name: Send pr list to releases 
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'nehora'
+        CHANNEL: 'releases'
         MESSAGE: '*we are realesed a new version to production* \n*Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :thumbsup: \n ${{env.NOTE}}'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
@@ -100,7 +100,7 @@ jobs:
     - name: Send msg to rnd 
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'nehora'
+        CHANNEL: 'rnd'
         MESSAGE: 'Hi all \nrelease is out :slightly_smiling_face: \n you can see #releases notes in releases channel'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
