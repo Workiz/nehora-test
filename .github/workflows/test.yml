@@ -101,7 +101,7 @@ jobs:
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
-        MESSAGE: 'Hi all \nrelease is out :slightly_smiling_face: \n you can see releases notes in \#releases channel'
+        MESSAGE: 'Hi all \nrelease is out :slightly_smiling_face: \n you can see releases notes in \\#releases channel'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
