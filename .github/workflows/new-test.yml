@@ -1,0 +1,17 @@
+name: new test
+on:
+  workflow_dispatch:
+    
+
+jobs:
+
+  echo-repo:
+    name: send slack msg
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout 
+      uses: actions/checkout@v3
+    - run: |
+        repo=$(basename `git rev-parse --show-toplevel`)
+        echo "repo $repo"
+    
