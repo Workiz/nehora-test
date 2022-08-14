@@ -6,7 +6,6 @@ on:
 jobs:
 
   send-slack-msg:
-    needs: [create-release]
     name: send slack msg
     runs-on: ubuntu-latest
     steps: 
