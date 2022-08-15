@@ -38,7 +38,7 @@ jobs:
         if [[ "$LAST_TAG" =~ ^v([0-9]\.[0-9]*)$ ]]; then
           echo "${BASH_REMATCH[1]}"
           git checkout workiz.com
-          git push origin --delete rc${BASH_REMATCH[1]}-branch
+          # git push origin --delete rc${BASH_REMATCH[1]}-branch
         fi
         current_branch=$(git rev-parse --abbrev-ref HEAD)
         echo "current branch $current_branch"
@@ -67,7 +67,7 @@ jobs:
         if [[ "$LAST_TAGS" =~ ^v([0-9]\.[0-9]*)$ ]]; then
           echo "${BASH_REMATCH[1]}"
           git checkout workiz.com
-          git push origin --delete rc${BASH_REMATCH[1]}-branch
+          # git push origin --delete rc${BASH_REMATCH[1]}-branch
         fi
         LAST_TAGS=$(git tag | sort -V | grep -i "^v[0-9]\.[0-9]*$" | tail -2)
         if [[ "$LAST_TAGS" =~ ^(v[a-z0-9\.\-]*).*(v[a-z0-9\.\-]*)$ ]]; then
