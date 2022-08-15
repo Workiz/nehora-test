@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -z   '""' ]]; then
+if [[ -z   "''" ]]; then
   echo "hi"
 else
   echo "here"
