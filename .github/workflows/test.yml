@@ -100,7 +100,7 @@ jobs:
         MESSAGE: 'hi all \nrelease is out :slightly_smiling_face: \n you can see release notes in releases channel'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"frontend","link": " https://github.com/Workiz/frontend/compare/${{env.PREV_TAG}}...v3.350"}]'
+        # LINKS: '[{"name" :"frontend","link": " https://github.com/Workiz/frontend/compare/${{env.PREV_TAG}}...v3.350"}]'
   # create-release:
   #   name: create-release-from-tag
   #   runs-on: ubuntu-latest
