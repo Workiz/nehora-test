@@ -1,8 +1,11 @@
 #!/bin/bash
+ str="this is a string"
 
-if [[ -z '"[{"name" :" Allure Report","link": "https://storage.googleapis.com/workiz-qa-reports/allure-report-${{env.PLATFORM}}-${{env.APPHASH}}/index.html"},
-                      {"name": " Link to GitHub Action" , "link" : "https://github.com/Workiz/native-automation/actions/runs/${{github.run_id}}"}]"' ]]; then
+if [[ ${#str} > 1 ]]; then
   echo "hi"
 else
   echo "here"
 fi
+
+n=${#str}
+echo "Length of the string is : $n "
