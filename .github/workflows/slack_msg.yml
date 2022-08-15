@@ -10,7 +10,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: workiz.com
+        ref: test
         token: ${{ secrets.GH_TOKEN_REPOS }}
         path: ./tmp/workiz-actions
     - name: Send failure slack msg 
@@ -22,3 +22,10 @@ jobs:
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :" Allure Report","link": "https://storage.googleapis.com/workiz-qa-reports/allure-report-${{env.PLATFORM}}-${{env.APPHASH}}/index.html"},
                       {"name": " Link to GitHub Action" , "link" : "https://github.com/Workiz/native-automation/actions/runs/${{github.run_id}}"}]' 
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora'
+        MESSAGE: 'Native automation failed to finish :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
