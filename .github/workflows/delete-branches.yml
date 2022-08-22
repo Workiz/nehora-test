@@ -27,11 +27,11 @@ jobs:
         # echo "3"
         #   if [ -n "$exists" ]; then
             echo "rc3.331-branch branch exists!"
-            git push origin --delete rc${BASH_REMATCH[1]}-branch
+            git push origin --delete rc3.331-branch || exit 0
             echo "rc3.331-branch backend branch deleted"
             cd ./tmp/nehora
             git config --global --add safe.directory /github/workspace/tmp/frontend
-            git push origin --delete rc3.331-branch
+            git push origin --delete rc3.331-branch || exit 0
             echo "rc3.331-branch frontend branch deleted"
             cd ../..
           # fi 
