@@ -1,0 +1,35 @@
+name: delete branches
+on:
+  workflow_dispatch:
+
+jobs:
+  delete-branches:
+    name: delete-branches
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Check out repository
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/nehora
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/nehora
+        fetch-depth: '0'
+    - name: delete branches  
+      run: | 
+        git config --global --add safe.directory /github/workspace
+        exists=`git show-ref refs/heads/rc3.331-branch`
+          if [ -n "$exists" ]; then
+            echo "rc3.331-branch branch exists!"
+            git push origin --delete rc${BASH_REMATCH[1]}-branch
+            echo "rc3.331-branch backend branch deleted"
+            cd ./tmp/nehora
+            git config --global --add safe.directory /github/workspace/tmp/frontend
+            git push origin --delete rc3.331-branch
+            echo "rc3.331-branch frontend branch deleted"
+            cd ../..
+          fi 
+        echo "here"
+        ls
