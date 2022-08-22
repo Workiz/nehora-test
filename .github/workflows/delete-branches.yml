@@ -23,9 +23,9 @@ jobs:
         git fetch --all
         git pull --tags
         echo "2"
-        exists=`git show-ref refs/heads/rc3.331-branch`
-        echo "3"
-          if [ -n "$exists" ]; then
+        # exists=`git show-ref refs/heads/rc3.331-branch`
+        # echo "3"
+        #   if [ -n "$exists" ]; then
             echo "rc3.331-branch branch exists!"
             git push origin --delete rc${BASH_REMATCH[1]}-branch
             echo "rc3.331-branch backend branch deleted"
@@ -34,6 +34,6 @@ jobs:
             git push origin --delete rc3.331-branch
             echo "rc3.331-branch frontend branch deleted"
             cd ../..
-          fi 
+          # fi 
         echo "here"
         ls
