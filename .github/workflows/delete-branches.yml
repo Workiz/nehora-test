@@ -20,8 +20,11 @@ jobs:
       run: | 
         git config --global --add safe.directory /github/workspace
         echo "1"
-        exists=`git show-ref refs/heads/rc3.331-branch`
+        git fetch --all
+        git pull --tags
         echo "2"
+        exists=`git show-ref refs/heads/rc3.331-branch`
+        echo "3"
           if [ -n "$exists" ]; then
             echo "rc3.331-branch branch exists!"
             git push origin --delete rc${BASH_REMATCH[1]}-branch
