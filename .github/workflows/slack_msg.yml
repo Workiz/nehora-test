@@ -91,7 +91,7 @@ jobs:
         echo "env FULL_NOTE ${{env.FULL_NOTE}}"
         echo "FULL_NOTE $FULL_NOTE"
     - name: Send pr list to releases 
-      if:  ${{ github.ref_name == rc* }}
+      if:  ${{ [[ github.ref_name == rc*  ]] }}
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
