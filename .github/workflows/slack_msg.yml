@@ -91,7 +91,7 @@ jobs:
         echo "env FULL_NOTE ${{env.FULL_NOTE}}"
         echo "FULL_NOTE $FULL_NOTE"
     - name: Send pr list to releases 
-      if:  ${{ [[ github.ref_name == rc*  ]] }}
+      if:  startsWith(${{github.ref_name}}, 'rc')
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
@@ -100,7 +100,7 @@ jobs:
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
     - name: Send msg to rnd 
-      if: ${{ github.ref_name == rc* }}
+      if: startsWith(${{github.ref_name}}, 'rc')
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
