@@ -4,10 +4,10 @@ on:
     
 jobs: 
   send-slack-msg:
-    needs: [create-release]
     name: send slack msg
     runs-on: ubuntu-latest
     steps: 
+    - run: echo "${{github.ref_name}}"
     - name: Checkout backend
       uses: actions/checkout@v3 
       with:
@@ -85,13 +85,13 @@ jobs:
         NOTE2=${NOTE2//\'/}
         NOTE2=${NOTE2//\*/•}
         echo "*backend* NOTE2 *frontend* $NOTE2"
-        FULL_NOTE=":php: *backend* \n$NOTE \n\n:react: *frontend* \n$NOTE2 "
+        FULL_NOTE=" $NOTE \n\n:react: *frontend* \n$NOTE2 "
         # NOTE=${NOTE//\*/•}
         echo "FULL_NOTE=$FULL_NOTE" >> $GITHUB_ENV
         echo "env FULL_NOTE ${{env.FULL_NOTE}}"
         echo "FULL_NOTE $FULL_NOTE"
     - name: Send pr list to releases 
-      if: github.ref_name =~ ^rc.*
+      if: ${{ startsWith(github.ref_name, 'rc') }}
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
@@ -100,7 +100,7 @@ jobs:
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
     - name: Send msg to rnd 
-      if: github.ref_name =~ ^rc.*
+      if: ${{ startsWith(github.ref_name, 'rc') }}
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
@@ -108,7 +108,7 @@ jobs:
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
     - name: Send pr list to releases 
-      if: github.ref_name =~ ^v.*
+      if: ${{ startsWith(github.ref_name, 'v') }}
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
@@ -117,7 +117,7 @@ jobs:
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
     - name: Send msg to rnd 
-      if: github.ref_name =~ ^v.*
+      if: ${{ startsWith(github.ref_name, 'v') }}
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
