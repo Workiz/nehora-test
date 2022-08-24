@@ -16,5 +16,7 @@ jobs:
         ref: ${{ github.ref_name }}
         token: ${{ secrets.GH_TOKEN_REPOS }}
         path: ./   
-    - run: git rev-parse --abbrev-ref HEAD
+    - run: |
+        git rev-parse --abbrev-ref HEAD
+        ls
    
