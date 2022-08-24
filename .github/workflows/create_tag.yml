@@ -13,11 +13,11 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: DEVOPS-422-workiz-actions-create-action-to-create-new-tag
+        ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
     - name: create-tag  
       uses: ./tmp/workiz-actions/create-tag
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
