@@ -14,4 +14,4 @@ jobs:
         --data-raw '{
             "job_name" : "rc_deploy",
             "status" : "in_progress"
-            }'
+            }' || echo "hi"
