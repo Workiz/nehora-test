@@ -1,0 +1,17 @@
+name: progress bar
+on:
+  workflow_dispatch:
+    
+
+jobs:
+
+  progress-bar:
+    runs-on: ubuntu-latest
+    steps: 
+    - run: |
+        curl --location --request POST 'https://infra-api.workiz.com/releaseProgress/update_job_status/' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "job_name" : "rc_deploy",
+            "status" : "in_progress"
+            }'
