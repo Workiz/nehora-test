@@ -5,6 +5,8 @@
 # fi
 
 status=$(curl --location --request POST 'https://infra-api.workiz.com/releaseProgress/get_train_status/')
+status="${status%\"}"
+status="${status#\"}"
 if [[ "$status" == "false" ]]; then
     echo "Error - train is lock now"
     exit 1
