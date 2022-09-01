@@ -15,6 +15,7 @@ jobs:
             exit 1
         fi
   job2: 
+    needs: [job1]
     runs-on: ubuntu-latest
     steps:
     - run: |-
