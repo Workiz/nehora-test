@@ -4,10 +4,8 @@
 #     echo 'branch exists!'
 # fi
 
-status=$(curl --location --request POST 'https://infra-api.workiz.com/releaseProgress/get_train_status/')
-status="${status%\"}"
-status="${status#\"}"
-if [[ "$status" == "false" ]]; then
+status=$(curl --location --request GET 'https://infra-api.workiz.com/releaseProgress/get_train_status/' | jq .'status')
+if ! $status ; then
     echo "Error - train is lock now"
     exit 1
 fi

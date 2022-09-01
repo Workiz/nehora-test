@@ -9,14 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |-
-        exit $(curl --location --request GET 'https://infra-api.workiz.com/releaseProgress/get_train_status/' | jq .'status')
-        # status=$(curl --location --request POST 'https://infra-api.workiz.com/releaseProgress/get_train_status/')
-        # status="${status%\"}"
-        # status="${status#\"}"
-        # if [[ "$status" == "false" ]]; then
-        #     echo "Error - train is lock now"
-        #     exit 1
-        # fi
+        status=$(curl --location --request GET -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" 'https://infra-api.workiz.com/releaseProgress/get_train_status/' | jq .'status')
+        if ! $status ; then
+            echo "Error - train is lock now"
+            exit 1
+        fi
   job2: 
     needs: [job1]
     runs-on: ubuntu-latest
