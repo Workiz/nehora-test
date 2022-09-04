@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: | 
-        echo "${{ github.event }}"
+        echo "${{ github.event.schedule }}"
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
