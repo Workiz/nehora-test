@@ -7,18 +7,10 @@ jobs:
     name: hot-fix
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Check out repository
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-        fetch-depth: '0'
-    - name: hot-fix  
-      uses: ./tmp/workiz-actions/hot-fix
-      env:
-        GITHUB_ACTOR: ${{ github.actor }}
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    - run: |-
+        curl \
+        -X POST \
+        -H "Accept: application/vnd.github+json" \ 
+        -H "Authorization: Bearer ${{ secrets.GH_TOKEN_REPOS }}" \
+        https://api.github.com/repos/OWNER/REPO/pulls \
+        -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"rc-mark","base":"workiz.com"}'
