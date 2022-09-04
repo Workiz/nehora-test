@@ -32,7 +32,5 @@ jobs:
             "job_name" : "rc_deploy",
             "status" : "failed"
             }' || echo -e "\e[1;31m infra-api sent failed"
-            
-
   
    
