@@ -35,3 +35,4 @@ jobs:
           https://api.github.com/repos/Workiz/nehora-test/pulls \
           -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'$GITHUB_REF'","base":"'$last_rc_branch'"}'
         fi
+
