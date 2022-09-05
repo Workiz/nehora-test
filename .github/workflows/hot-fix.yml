@@ -20,7 +20,7 @@ jobs:
         echo "open workiz.com pr"
         workiz_pr_url=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
         https://api.github.com/repos/Workiz/nehora-test/pulls \
-        -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'$GITHUB_REF'","base":"workiz.com"}' | jq .'html_url')
+        -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'$GITHUB_REF_NAME'","base":"workiz.com"}' | jq .'html_url')
         git config --global --add safe.directory /github/workspace
         if [[ "$GITHUB_REF_NAME" =~ ^v[0-9]\.([0-9]*)?(-hf[0-9]*)?-branch$ ]]; then  
             branch_number=${BASH_REMATCH[1]}
@@ -34,7 +34,7 @@ jobs:
           echo "open rc branch pr"
           rc_pr_url=$(curl -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
           https://api.github.com/repos/Workiz/nehora-test/pulls \
-          -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'$GITHUB_REF'","base":"'rc3.$rc_number-branch'"}' | jq .'html_url')
+          -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'$GITHUB_REF_NAME'","base":"'rc3.$rc_number-branch'"}' | jq .'html_url')
           echo "rc_pr_url $rc_pr_url" >> $GITHUB_ENV
         fi
     - name: Send slack msg 
@@ -45,3 +45,4 @@ jobs:
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github pull request","link": "$rc_pr_url"}, {"name" :"github pull request","link": "$rc_pr_url"}]'
+
