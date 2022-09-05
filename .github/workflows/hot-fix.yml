@@ -42,6 +42,7 @@ jobs:
           echo "rc_pr_url=$rc_pr_url" >> $GITHUB_ENV
         fi
     - name: Send slack msg 
+      if: ${{env.rc_pr_url}}
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora-test'
@@ -49,4 +50,13 @@ jobs:
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"workiz pull request","link": "${{env.workiz_pr_url}}"}, {"name" :"rc pull request","link": "${{env.rc_pr_url}}"}]'
+    - name: Send slack msg 
+      if: ${{ ! env.rc_pr_url}}
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora-test'
+        MESSAGE: '* just test*'
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"workiz pull request","link": "${{env.workiz_pr_url}}"}]'
 
