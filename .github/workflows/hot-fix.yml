@@ -17,8 +17,8 @@ jobs:
         # https://api.github.com/repos/Workiz/nehora-test/pulls \
         # -d '{"title":"Amazing new feature","body":"Please pull these awesome changes in!","head":"'$GITHUB_REF'","base":"workiz.com"}'
         # git config --global --add safe.directory /github/workspace
-        echo "GITHUB_REF $GITHUB_REF"
-        if [[ "$GITHUB_REF" =~ ^v[0-9]\.([0-9]*)?(-hf[0-9]*)?-branch$ ]]; then  
+        echo "GITHUB_HEAD_REF $GITHUB_HEAD_REF"
+        if [[ "$GITHUB_HEAD_REF" =~ ^v[0-9]\.([0-9]*)?(-hf[0-9]*)?-branch$ ]]; then  
             branch_number=${BASH_REMATCH[1]}
         fi
         echo "branch_number $branch_number"
