@@ -44,7 +44,7 @@ jobs:
     - name: Send slack msg 
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'nehora'
+        CHANNEL: 'nehora-test'
         MESSAGE: '* just test*'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
