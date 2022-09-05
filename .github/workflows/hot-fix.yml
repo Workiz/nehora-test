@@ -45,5 +45,5 @@ jobs:
         MESSAGE: 'please merge prs'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"github pull request","link": "$rc_pr_url"}, {"name" :"github pull request","link": "$rc_pr_url"}]'
+        LINKS: '[{"name" :"github pull request","link": "${{env.rc_pr_url}}"}, {"name" :"github pull request","link": "${{env.rc_pr_url}}"}]'
 
