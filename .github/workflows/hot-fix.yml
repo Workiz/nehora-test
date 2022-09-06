@@ -41,5 +41,5 @@ jobs:
       with:
         CHANNEL: 'nehora'
         MESSAGE: ' @${{ github.actor }} To complete the hotfix :fire: , you should to the follow steps: \n 1.open pr from your hotfix branch to current rc branch (if exists) and workiz.com \n 2.merge the first pr to rc branch \n 3.merge the second pr to workiz.com'
-        SUCCESS: true
+        SUCCESS: 'warning'
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
