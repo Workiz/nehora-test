@@ -1,25 +1,46 @@
 name: hot fix
 on:
-  workflow_dispatch:
+  push:
 
 jobs:
-  hot-fix:
+  # open-prs:
+  #   name: hot-fix msg and prs
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout 
+  #     uses: actions/checkout@v3
+  #   - name: checkour workiz-actions
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: Workiz/workiz-actions
+  #       ref: DEVOPS-449-hotfix-improve-hotfix-flow
+  #       token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+  #       path: ./tmp/workiz-actions
+  #   - name: action 
+  #     # if: ${{ ! env.rc_pr_url}}
+  #     uses: ./tmp/workiz-actions/hotfix-pr
+  #     env:
+  #       GITHUB_ACTOR: ${{ github.actor }}
+  #       WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  open-prs:
+    needs: [deploy-prod]
     name: hot-fix msg and prs
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout 
-      uses: actions/checkout@v3
-    - name: checkour workiz-actions
+
+    - name: checkout workiz-actions
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: DEVOPS-449-hotfix-improve-hotfix-flow
+        ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: action 
-      # if: ${{ ! env.rc_pr_url}}
-      uses: ./tmp/workiz-actions/hotfix-pr
-      env:
-        GITHUB_ACTOR: ${{ github.actor }}
+   
+    - name: Send failure slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora'
+        MESSAGE: ' @${{ github.actor }} To complete the hotfix :fire: , you should to the follow steps: \n 1.open pr from your hotfix branch to current rc branch (if exists) and workiz.com \n 2.merge the first pr to rc branch \n 3.merge the second pr to workiz.com'
+        SUCCESS: "warning"
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
