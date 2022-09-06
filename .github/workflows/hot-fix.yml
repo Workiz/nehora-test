@@ -24,7 +24,6 @@ jobs:
   #       WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
   #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   open-prs:
-    needs: [deploy-prod]
     name: hot-fix msg and prs
     runs-on: ubuntu-latest
     steps:
