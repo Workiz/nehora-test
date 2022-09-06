@@ -4,10 +4,10 @@
 #     echo 'branch exists!'
 # fi
 # comments are cool
-status=$(curl --location --request GET 'https://infra-api.workiz.com/releaseProgress/get_train_status/' \
---header 'WORKIZ_INFRA_AUTH: TotF2Yr6r1ju9ZHp' | jq .'status')
-echo "$status"
-if ! $status ; then
-    echo "Error - train is lock now"
-    exit 1
-fi
+GITHUB_REF="v3.343-hf-branch"
+if [[ "$GITHUB_REF" =~ ^v[0-9]\.([0-9]*)?(-hf[0-9]*)?-branch$ ]]; then  
+            branch_number=${BASH_REMATCH[1]}
+        fi
+        echo "branch_number $branch_number"
+        rc_number=`expr $branch_number + 1`
+        echo "rc_number $rc_number"
