@@ -2,7 +2,7 @@ name: send slack msg on update rc branch
 on:
  push:
   branches:    
-    - 'rc.*'
+    - 'rc*'
 
  
 jobs:
