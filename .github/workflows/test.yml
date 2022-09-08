@@ -23,7 +23,7 @@ jobs:
     - name: Send msg to 'release-committee' 
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'nehora'
+        CHANNEL: 'nehora-test'
         MESSAGE: ' @${{ github.actor }} just push commit to ${{github.ref_name}} branch.'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
