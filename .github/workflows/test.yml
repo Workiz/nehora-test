@@ -6,26 +6,27 @@ on:
 
  
 jobs:
+
+  
   send-slack-msg:
     name: send slack msg on update rc branch
     runs-on: ubuntu-latest
     steps:
 
-    
-    - run: echo "${{ github.actor }}"
-    # - name: Checkout shared actions
-    #   uses: actions/checkout@v3
-    #   with:
-    #     repository: Workiz/workiz-actions
-    #     ref: workiz.com
-    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    #     path: ./tmp/workiz-actions
-    # - name: Send msg to 'release-committee' 
-    #   uses: ./tmp/workiz-actions/slack-msg
-    #   with:
-    #     CHANNEL: 'nehora'
-    #     MESSAGE: 'Hi all \n hotfix is out :fire: \n you can see releases notes in #releases channel'
-    #     SUCCESS: true
-    #     WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Send msg to 'release-committee' 
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehora'
+        MESSAGE: ' @${{ github.actor }} just push commit to $GITHUB_REF_NAME branch.'
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"commit","link": "https://github.com/Workiz/nehora-test/commit/$GITHUB_SHA"}]'
 
 
