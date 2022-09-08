@@ -24,9 +24,9 @@ jobs:
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehora'
-        MESSAGE: ' @${{ github.actor }} just push commit to $GITHUB_REF_NAME branch.'
+        MESSAGE: ' @${{ github.actor }} just push commit to ${{env.GITHUB_REF_NAME}} branch.'
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"commit","link": "https://github.com/Workiz/nehora-test/commit/$GITHUB_SHA"}]'
+        LINKS: '[{"name" :"commit","link": "https://github.com/Workiz/nehora-test/commit/${{env.GITHUB_SHA}}"}]'
 
 
