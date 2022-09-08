@@ -1,44 +1,15 @@
-name: test
+name: send slack msg on update rc branch
 on:
-  workflow_dispatch:
-    
-  # schedule:
-  #   - cron:  '*/5 * * * *'
+ push:
+  branches:    
+    - 'rc.*'
 
+ 
 jobs:
-
-  create-rc-branches-and-tags:
-    outputs:
-      branch: ${{ steps.branch.outputs.branch }}
-    name: create frontend and backend branches and tags
+  send-slack-msg:
+    name: send slack msg on update rc branch
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Checkout nehora
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/nehora
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/nehora
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: test
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/workiz-actions
-    - name: create branches 
-      uses: ./tmp/workiz-actions/create-rc-branches-and-tags
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
-        ANOTHER_REPO: nehora
-    - name: set branch output
-      id: branch
-      run: |
-        echo "::set-output name=branch::${{ env.BRANCH }}"
-        
 
-  
-   
+    - name: Checkout
+      run: echo "${{ github.actor }}"
