@@ -4,10 +4,7 @@
 #     echo 'branch exists!'
 # fi
 # comments are cool
-GITHUB_REF="v3.343-hf-branch"
-if [[ "$GITHUB_REF" =~ ^v[0-9]\.([0-9]*)?(-hf[0-9]*)?-branch$ ]]; then  
-            branch_number=${BASH_REMATCH[1]}
-        fi
-        echo "branch_number $branch_number"
-        rc_number=`expr $branch_number + 1`
-        echo "rc_number $rc_number"
+diff=$(git cherry -v origin/workiz.com)
+if [[ "$diff" == "" ]]; then 
+    echo "here"
+fi
