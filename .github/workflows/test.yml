@@ -12,10 +12,16 @@ jobs:
     name: send slack msg on update rc branch
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
     - name: check if first commit
       run: |-
           git config --global --add safe.directory /github/workspace
           diff=$(git cherry -v origin/workiz.com)
+          if [[ "$diff" == "" ]]; then 
+            echo "first commit of branch"
+            exit 1
+          fi
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
