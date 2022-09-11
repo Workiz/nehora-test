@@ -18,14 +18,14 @@ jobs:
       run: |-
 
           git config --global --add safe.directory /github/workspace
-          git pull
+          # git pull
           git checkout workiz.com
           git pull
           git checkout $GITHUB_HEAD_REF
           diff=$(git cherry -v workiz.com)
           echo "diff $diff"
           if [[ "$diff" == "" ]]; then 
-            echo "first commit of branch"
+            echo "This is the first commit of branch"
             exit 1
           fi
     - name: Checkout shared actions
