@@ -16,8 +16,14 @@ jobs:
       uses: actions/checkout@v3
     - name: check if first commit
       run: |-
+
           git config --global --add safe.directory /github/workspace
-          diff=$(git cherry -v origin/workiz.com)
+          git pull
+          git checkout workiz.com
+          git pull
+          git checkout rc-test
+          diff=$(git cherry -v workiz.com)
+          echo "diff $diff"
           if [[ "$diff" == "" ]]; then 
             echo "first commit of branch"
             exit 1
@@ -32,6 +38,7 @@ jobs:
     - name: Send msg to 'release-committee' 
       uses: ./tmp/workiz-actions/slack-msg
       with:
+
         CHANNEL: 'nehora'
         MESSAGE: ' @${{ github.actor }} just push commit to $GITHUB_REF_NAME branch.'
         SUCCESS: true
