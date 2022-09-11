@@ -23,6 +23,7 @@ jobs:
           git pull
           git checkout rc-test
           diff=$(git cherry -v workiz.com)
+          echo "diff $diff"
           if [[ "$diff" == "" ]]; then 
             echo "first commit of branch"
             exit 1
