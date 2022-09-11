@@ -18,6 +18,7 @@ jobs:
       run: |-
 
           git config --global --add safe.directory /github/workspace
+          git pull
           git checkout workiz.com
           git pull
           git checkout rc-test
