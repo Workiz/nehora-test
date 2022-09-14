@@ -1,8 +1,7 @@
-name: send slack msg on update rc branch
+name: test
 on:
- push:
-  branches:    
-    - 'rc*'
+ workflow_dispatch:
+   
 
  
 jobs:
