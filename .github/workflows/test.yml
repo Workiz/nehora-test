@@ -20,5 +20,5 @@ jobs:
         path: ./tmp/workiz-actions
     - name: check github actor 
       uses: ./tmp/workiz-actions/check-github-actor
-      with:
-        GITHUB_ACTOR: ${{ github.actor }}
+      # with:
+      #   GITHUB_ACTOR: ${{ github.actor }}
