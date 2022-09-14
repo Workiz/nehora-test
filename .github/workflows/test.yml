@@ -8,26 +8,10 @@ on:
 jobs:
 
   
-  send-slack-msg:
-    name: send slack msg on update rc branch
+  check-github-actor:
+    name: check github actor
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: check if first commit
-      run: |-
-
-          git config --global --add safe.directory /github/workspace
-          git pull
-          git checkout workiz.com
-          git pull
-          git checkout $GITHUB_HEAD_REF
-          diff=$(git cherry -v workiz.com)
-          echo "diff $diff"
-          if [[ "$diff" == "" ]]; then 
-            echo "first commit of branch"
-            exit 1
-          fi
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
@@ -35,14 +19,7 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: Send msg to 'release-committee' 
-      uses: ./tmp/workiz-actions/slack-msg
+    - name: check github actor 
+      uses: ./tmp/workiz-actions/check-github-actor
       with:
-
-        CHANNEL: 'nehora'
-        MESSAGE: ' @${{ github.actor }} just push commit to $GITHUB_REF_NAME branch.'
-        SUCCESS: true
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"commit","link": "https://github.com/Workiz/nehora-test/commit/$GITHUB_SHA"}]'
-
-
+        GITHUB_ACTOR: ${{ github.actor }}
