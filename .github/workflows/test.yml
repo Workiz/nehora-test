@@ -7,7 +7,7 @@ on:
 jobs:
 
   
-  check-github-actor:
+  init:
     name: check github actor
     runs-on: ubuntu-latest
     steps:
@@ -19,6 +19,4 @@ jobs:
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
     - name: check github actor 
-      uses: ./tmp/workiz-actions/check-github-actor
-      # with:
-      #   GITHUB_ACTOR: ${{ github.actor }}
+      uses: ./tmp/workiz-actions/init-action
