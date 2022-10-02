@@ -2,7 +2,11 @@ name: test
 on:
  workflow_dispatch:
    
-
+  inputs:
+      environment:
+        description: 'Define env name'     
+        required: false
+        default: 'prod'
  
 jobs:
 
