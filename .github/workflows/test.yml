@@ -10,7 +10,6 @@ on:
  
 jobs:
 
-  
   init:
     name: check github actor
     runs-on: ubuntu-latest
