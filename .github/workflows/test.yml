@@ -12,15 +12,23 @@ jobs:
 
   
   init:
+    outputs:
+      branch: ${{ steps.branch.outputs.branch }}
+      rc_tag: ${{ steps.branch.outputs.rc_tag }}
     name: check github actor
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-    - name: check github actor 
-      uses: ./tmp/workiz-actions/init-action
+    - name: set branch output
+      id: branch
+      run: |
+        echo "::set-output name=branch::jgkfld"
+        echo "::set-output name=rc_tag::vjospl"
+  job2: 
+    needs: [Init]
+    name: check github actor
+    runs-on: ubuntu-latest
+    steps:
+    - name: set branch output
+      id: branch
+      run: |
+        echo "${{ needs.create-rc-branches-and-tags.outputs.rc_tag }}"    
