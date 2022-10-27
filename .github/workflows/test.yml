@@ -15,7 +15,7 @@ jobs:
     outputs:
       branch: ${{ steps.branch.outputs.branch }}
       rc_tag: ${{ steps.branch.outputs.rc_tag }}
-    name: check github actor
+    name: init
     runs-on: ubuntu-latest
     steps:
     - name: set branch output
@@ -25,10 +25,10 @@ jobs:
         echo "::set-output name=rc_tag::vjospl"
   job2: 
     needs: [Init]
-    name: check github actor
+    name: job2
     runs-on: ubuntu-latest
     steps:
     - name: set branch output
       id: branch
       run: |
-        echo "${{ needs.create-rc-branches-and-tags.outputs.rc_tag }}"    
+        echo "${{ needs.Init.outputs.rc_tag }}"    
