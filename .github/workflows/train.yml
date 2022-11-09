@@ -1,7 +1,8 @@
 name: 🚅 train
 
 on:
-  push:
+  workflow_dispatch:
+    
 
 env:
   BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
