@@ -36,19 +36,9 @@ jobs:
         ref: DEVOPS-567-workiz-actions-refactor-tag-creation
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: test
-      run: | 
-        curl -s -X POST https://api.github.com/repos/Workiz/nehora-test/git/refs \
-        -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-        -d @- << EOF
-        {
-        "ref": "refs/tags/test-tag",
-        "sha": "cc93d549e0917181b61c54fedfa29c93dd98d8c8"
-        }
-        EOF
     - name: check github actor 
       uses: ./tmp/workiz-actions/create-tags-and-branches
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
         ANOTHER_REPO: nehora
 
