@@ -1,6 +1,7 @@
 name: test vfdkl
 on:
-  push:
+  workflow_dispatch:
+    
    
  
 jobs:
