@@ -1,34 +1,16 @@
-name: test
+name: test vfdkl
 on:
- workflow_dispatch:
+  push:
    
-  inputs:
-      environment:
-        description: 'Define env name'     
-        required: false
-        default: 'prod'
  
 jobs:
 
   
   init:
-    outputs:
-      branch: ${{ steps.branch.outputs.branch }}
-      rc_tag: ${{ steps.branch.outputs.rc_tag }}
     name: init
     runs-on: ubuntu-latest
     steps:
     - name: set branch output
       id: branch
       run: |
-        echo "::set-output name=branch::jgkfld"
-        echo "rc_tag=fmdslp;" >> $GITHUB_OUTPUT
-  job2: 
-    needs: [Init]
-    name: job2
-    runs-on: ubuntu-latest
-    steps:
-    - name: set branch output
-      id: branch
-      run: |
-        echo "${{ needs.Init.outputs.rc_tag }}"    
+        echo "$GITHUB_WORKFLOW"
