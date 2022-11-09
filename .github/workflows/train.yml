@@ -1,4 +1,4 @@
-name: ☁️ deploy production
+name: 🚅 train
 
 on:
   push:
@@ -19,6 +19,15 @@ jobs:
     name: check github actor
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+    - name: Checkout nehora
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/nehora
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/nehora
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
