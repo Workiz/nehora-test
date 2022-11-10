@@ -14,4 +14,24 @@ jobs:
     - name: set branch output
       id: branch
       run: |
-        echo "$GITHUB_WORKFLOW"
+        - name: Build and push docker
+    - run: |-
+        exists=$( gcloud container images list-tags gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE --format=json --filter=tags:$GITHUB_SHA )
+        if [[ "$exists" == "[]" ]]; then 
+          echo -e "\e[1;34m build and push docker"
+          npm ci
+          ASSETS_PATH="$ASSETS_RC_PATH_URL/" npm run build
+          docker build \
+            --build-arg GITHUB_SHA="$GITHUB_SHA" \
+            --build-arg GITHUB_REF="${GITHUB_REF##*/}" \
+            --tag "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:latest" \
+            --tag "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:$GITHUB_SHA" \
+            --tag "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:${{ needs.create-rc-branches-and-tags.outputs.rc_tag }}" \
+            .
+            docker push --all-tags "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE"
+        else
+          echo -e "\e[1;34m [INFO] Docker img already exists. skip building. tag and push"
+          gcloud container images add-tag gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:$GITHUB_SHA \
+          gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:${{ needs.create-rc-branches-and-tags.outputs.rc_tag }} \
+          gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:latest
+        fi

@@ -38,6 +38,8 @@ jobs:
         path: ./tmp/workiz-actions
     - name: check github actor 
       uses: ./tmp/workiz-actions/create-tags-and-branches
+      with: 
+        CREATE_RC_TAGS: true
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
         ANOTHER_REPO: nehora
