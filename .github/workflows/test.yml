@@ -1,37 +1,35 @@
-name: test vfdkl
+name: test
+
 on:
   workflow_dispatch:
-    
-   
- 
-jobs:
 
-  
-  init:
-    name: init
+jobs:
+  releases-msg:
+    name: releases-msg
     runs-on: ubuntu-latest
     steps:
-    - name: set branch output
-      id: branch
-      run: |
-        - name: Build and push docker
-    - run: |-
-        exists=$( gcloud container images list-tags gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE --format=json --filter=tags:$GITHUB_SHA )
-        if [[ "$exists" == "[]" ]]; then 
-          echo -e "\e[1;34m build and push docker"
-          npm ci
-          ASSETS_PATH="$ASSETS_RC_PATH_URL/" npm run build
-          docker build \
-            --build-arg GITHUB_SHA="$GITHUB_SHA" \
-            --build-arg GITHUB_REF="${GITHUB_REF##*/}" \
-            --tag "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:latest" \
-            --tag "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:$GITHUB_SHA" \
-            --tag "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:${{ needs.create-rc-branches-and-tags.outputs.rc_tag }}" \
-            .
-            docker push --all-tags "gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE"
-        else
-          echo -e "\e[1;34m [INFO] Docker img already exists. skip building. tag and push"
-          gcloud container images add-tag gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:$GITHUB_SHA \
-          gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:${{ needs.create-rc-branches-and-tags.outputs.rc_tag }} \
-          gcr.io/$ALTER_PROJECT_ID/$K8S_IMAGE:latest
-        fi
+    - name: Checkout backend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/backend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-589-github-actions-create-releases-msg
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Checkout frontend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/frontend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/frontend
+    - name: releases-msg
+      uses: ./tmp/workiz-actions/releases-msg
+      with:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
