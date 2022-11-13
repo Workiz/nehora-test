@@ -4,7 +4,8 @@
 #     echo 'branch exists!'
 # fi
 # comments are cool
-diff=$(git cherry -v origin/workiz.com)
-if [[ "$diff" == "" ]]; then 
-    echo "here"
+if [[ "rc3.380-branch" =~ ^(rc[0-9]\.[0-9]*)?(-hf[0-9]*)?-branch$ ]]
+    then
+        
+        echo "${BASH_REMATCH[1]}" 
 fi
