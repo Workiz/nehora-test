@@ -1,44 +1,35 @@
 name: test
+
 on:
   workflow_dispatch:
-    
-  # schedule:
-  #   - cron:  '*/5 * * * *'
 
 jobs:
-
-  create-rc-branches-and-tags:
-    outputs:
-      branch: ${{ steps.branch.outputs.branch }}
-    name: create frontend and backend branches and tags
+  releases-msg:
+    name: releases-msg
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Checkout nehora
+    - name: Checkout backend
       uses: actions/checkout@v3
       with:
-        repository: Workiz/nehora
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/nehora
+        repository: Workiz/backend
+        ref: rc_test
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: test
-        token: ${{ secrets.GH_TOKEN_REPOS }}
+        ref: DEVOPS-589-github-actions-create-releases-msg
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: create branches 
-      uses: ./tmp/workiz-actions/create-rc-branches-and-tags
-      env:
+    - name: Checkout frontend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/frontend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/frontend
+    - name: releases-msg
+      uses: ./tmp/workiz-actions/releases-msg
+      with:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
-        ANOTHER_REPO: nehora
-    - name: set branch output
-      id: branch
-      run: |
-        echo "::set-output name=branch::${{ env.BRANCH }}"
-        
-
-  
-   
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
