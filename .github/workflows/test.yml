@@ -11,8 +11,8 @@ jobs:
     - name: Checkout backend
       uses: actions/checkout@v3
       with:
-        repository: Workiz/backend
-        ref: v_test
+        repository: Workiz/frontend
+        ref: v3.397-hf1-branch
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
     - name: Checkout shared actions
       uses: actions/checkout@v3
@@ -21,13 +21,13 @@ jobs:
         ref: DEVOPS-589-github-actions-create-releases-msg
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: Checkout frontend
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/frontend
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/frontend
+    # - name: Checkout frontend
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/frontend
+    #     ref: workiz.com
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    #     path: ./tmp/frontend
     - name: releases-msg
       uses: ./tmp/workiz-actions/releases-msg
       with:
