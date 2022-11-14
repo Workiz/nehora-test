@@ -76,7 +76,7 @@ jobs:
         gcloud --quiet auth configure-docker
     - name: Build
       run: |
-        exists=$( gcloud container images list-tags gcr.io/${{ env.GKE_PROJECT_ALTER }}/${{ env.CORE_IMAGE }} --format=json --filter=tags:$GITHUB_SHA )
+        exists=$( gcloud container images list-tags gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.CORE_IMAGE }} --format=json --filter=tags:$GITHUB_SHA )
         if [[ "$exists" == "[]" ]]; then 
           echo -e "\e[1;34m build and push docker"
           # docker build \
