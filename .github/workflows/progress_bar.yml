@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
     - name: infra-api failed
+      run: | 
+        fgecho "failure"
+    - name: infra-api failed
       if: ${{ failure() && startsWith(github.ref_name, 'wo') }}
       run: | 
         echo "failure"
