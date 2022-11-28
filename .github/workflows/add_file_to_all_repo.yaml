@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: derberg/copy-files-to-other-repositories@v1.0.0
+      - uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791 # v2
+      - uses: derberg/copy-files-to-other-repositories@c231d1d1832dec3acf4564d3003b80cbc33dd966 # v1.0.0
         with:
           github_token: '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'
           #you must specify what pattern to include otherwise all files from the repository will be replicated 

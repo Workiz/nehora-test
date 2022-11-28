@@ -9,21 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
     - name: Checkout backend
-      uses: actions/checkout@v3 
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3 
       with:
         repository: Workiz/backend
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_REPOS }}
         path: ./
     - name: Checkout frontend
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/frontend
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_REPOS }}
         path: ./tmp/frontend
     - name: Checkout shared actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com

@@ -53,20 +53,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
     - name: Check out workiz-actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
-    - uses: google-github-actions/auth@v0
+    - uses: google-github-actions/auth@c4799db9111fba4461e9f9da8732e5057b394f72 # v0
       with:
         credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
     - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v0' 
+      uses: 'google-github-actions/setup-gcloud@ee9693ff89cdf73862b8a13988f6a71070e8fc58' # v0 
     - run: |
         gcloud components install beta
     # Configure docker to use the gcloud command-line tool as a credential helper

@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
     - name: create rc branch
       id: create-rc-branch
       if: ${{ github.ref_name }} == "workiz.com"
@@ -76,16 +76,16 @@ jobs:
     name: db migrate RC MySQL
     runs-on: backend-runner
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       - name: Checkout shared actions
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
         with:
           repository: Workiz/workiz-actions
           ref: workiz.com
           token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
           path: ./tmp/workiz-actions
       - name: Checkout shared actions
-        uses: actions/checkout@v3
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
         with:
           repository: Workiz/workiz-actions
           ref: workiz.com
@@ -114,9 +114,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
     - name: Checkout shared actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com
@@ -148,9 +148,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
     - name: Checkout shared actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com
@@ -183,9 +183,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
     - name: Checkout shared actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com
@@ -198,9 +198,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
     - name: Checkout shared actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8 # v3
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com
