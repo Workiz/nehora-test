@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: derberg/copy-files-to-other-repositories@v1.0.0
+      - uses: derberg/copy-files-to-other-repositories@v1.0.3
         with:
           github_token: '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'
           #you must specify what pattern to include otherwise all files from the repository will be replicated 
