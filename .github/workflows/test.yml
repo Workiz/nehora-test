@@ -1,7 +1,7 @@
 name: test
 
 on:
-  workflow_dispatch:
+  push:
 env: 
   BACKEND_BRANCH: ${{ github.ref_name }}
   GKE_PROJECT: genial-runway-125805
@@ -91,8 +91,9 @@ jobs:
           echo -e "\e[1;34m [INFO] Docker img already exists. skip building. tag and push"
           echo -e "\e[1;34m push images - gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/$ALTER_IMAGE:latest , gcr.io/$GKE_PROJECT/$CORE_IMAGE:${{ needs.create-tag.outputs.tag_to_deploy }} , gcr.io/$GKE_PROJECT/$CORE_IMAGE:$GITHUB_SHA , gcr.io/$GKE_PROJECT/$CORE_IMAGE:latest"
           
+          
           gcloud container images add-tag gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:1431e85e976d94e3b9584a26f963ae05c17394db \ 
-          gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/$ALTER_IMAGE:test2
+          gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:test2
           
           # gcloud container images add-tag gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:$GITHUB_SHA \ 
           # gcr.io/"$GKE_PROJECT"/"$CORE_IMAGE":"$GITHUB_SHA" 
