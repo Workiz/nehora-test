@@ -53,13 +53,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: preprod
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/backend
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        fetch-depth: '0'
+    # - name: Checkout
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/backend
+    #     ref: workiz.com
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    #     fetch-depth: '0'
     - uses: google-github-actions/auth@v0
       with:
         credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
