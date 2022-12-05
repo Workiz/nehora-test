@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 env: 
   BACKEND_BRANCH: ${{ github.ref_name }}
-  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+  GKE_PROJECT: genial-runway-125805
   GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
   GKE_CLUSTER: wstgcluster
   GKE_ZONE: us-central1-b
