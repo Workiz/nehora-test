@@ -81,11 +81,7 @@ jobs:
           --build-arg GITHUB_SHA="$GITHUB_SHA" \
           --build-arg GITHUB_REF="${GITHUB_REF##*/}" \
           -t gcr.io/"$GKE_PROJECT"/"$CORE_IMAGE":"$GITHUB_SHA" \
-          # -t gcr.io/"$GKE_PROJECT"/"$CORE_IMAGE":latest \
-          # -t gcr.io/"$GKE_PROJECT"/"$CORE_IMAGE":${{ needs.create-tag.outputs.tag_to_deploy }} \
           -t gcr.io/"${{ secrets.GKE_PROJECT_ALTER }}"/"$ALTER_IMAGE":"$GITHUB_SHA" \
-          # -t gcr.io/"${{ secrets.GKE_PROJECT_ALTER }}"/"$ALTER_IMAGE":latest \
-          # -t gcr.io/"${{ secrets.GKE_PROJECT_ALTER }}"/"$ALTER_IMAGE":${{ needs.create-tag.outputs.tag_to_deploy }} \
           .
           docker push gcr.io/$GKE_PROJECT/$CORE_IMAGE --all-tags
           docker push gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/$ALTER_IMAGE --all-tags

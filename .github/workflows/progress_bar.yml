@@ -1,6 +1,7 @@
 name: progress bar
 on:
-  push:
+  workflow_dispatch:
+    
     
 
 jobs:
