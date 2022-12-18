@@ -29,7 +29,7 @@ jobs:
     - name: create-tags-and-branches
       uses: ./tmp/workiz-actions/create-tags-and-branches
       with: 
-        CREATE_RC_TAGS: true
+        CREATE_RC_TAGS: false
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
         ANOTHER_REPO: nehora
