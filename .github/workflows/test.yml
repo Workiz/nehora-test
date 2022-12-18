@@ -1,100 +1,29 @@
-name: test
-
+name: TEST
 on:
-  push:
-env: 
-  BACKEND_BRANCH: ${{ github.ref_name }}
-  GKE_PROJECT: genial-runway-125805
-  GKE_EMAIL: ${{ secrets.GKE_EMAIL }}
-  GKE_CLUSTER: wstgcluster
-  GKE_ZONE: us-central1-b
-  GITHUB_SHA: ${{ github.sha }}
-  NEWRELIC_KEY: ${{ secrets.NEWRELIC_KEY }}
-  NEWRELIC_APP_NAME: app.workiz.com
-  MAILGUNKEY: ${{ github.MAILGUNKEY}}
-  GCP_REGION: us-central1
-  GCP_ZONE: us-central1-b
-  CORE_IMAGE: backend-img
-  ALTER_IMAGE: backend-php
-  REGISTRY_HOSTNAME: gcr.io
-  TEMPLATE: backend-
-  MIG:  preprod-ig
-  URL_MAP_NAME: backend-preprod-lb
-  PREPROD_PATH_MATCHER: path-matcher-6
-  PREPROD_BE_BUCKET: be-assets-2
-  AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}
-  AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}
-  BUCKET_PRE_PATH:  static-cdn.workiz.com/fe/pre/latest
-  BUCKET_PATH:  static-cdn.workiz.com/fe/latest
-  BUCKET_ROLLBACK_PATH:  static-cdn.workiz.com/fe/older
-  ASSETS_PATH_URL: "https://assets.workiz.com/"
-  ASSETS_BUCKET_PATH: assets.workiz.com
-  API_PATH_MATCHER: path-matcher-7
-  APP_PATH_MATCHER: path-matcher-3
-  FIRST_GROUP: preprod-ig
-  SECOND_GROUP: preprod2-ig
-  MAX_RPS: 100
-  WORKIZ_INTERNAL_BE: workiz-interal-all-https
-  LONG_PROCESS_BE: long-proccess-api
-  AUTOSCALE_CPU: 0.35
-  COOL_DOWN_SECS: 120
-  MAX_REPLICAS: 20
-  MIN_REPLICAS: 1
-  PROD_DEFAULT_MIN_REPLICAS: 3
-  PROD_BE_BUCKET: be-assets-1
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
-  K8S_NAMESPACE: backend-php-prod
-  RELEASE_NAME: backend-php
-  BACKEND_PHP_HELM_VERSION: "0.1.0"
+  workflow_dispatch:
+    
+    
+
 jobs:
-   build-and-push-docker:
-    name: build and push docker 
+
+  progress-bar:
     runs-on: ubuntu-latest
-    environment: preprod
-    steps:
-    # - name: Checkout
-    #   uses: actions/checkout@v3
-    #   with:
-    #     repository: Workiz/backend
-    #     ref: workiz.com
-    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    #     fetch-depth: '0'
-    - uses: google-github-actions/auth@v0
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Check out workiz-actions
+      uses: actions/checkout@v3
       with:
-        credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v0' 
-    - run: |
-        gcloud components install beta
-    - run: |
-        gcloud --quiet auth configure-docker
-    - name: Build
-      run: |
-        echo GITHUB_SHA=1431e85e976d94e3b9584a26f963ae05c17394db >> GITHUB_ENV 
-        echo -e "\e[1;34m checking if docker img gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:$GITHUB_SHA  exists... "
-        exists=$( gcloud container images list-tags gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }} --format=json --filter=tags:1431e85e976d94e3b9584a26f963ae05c17394db )
-        if [[ "$exists" == "[]" ]]; then 
-          echo -e "\e[1;34m img not exists. build and push docker"
-          echo -e "\e[1;34m push images - gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/$ALTER_IMAGE:latest , gcr.io/$GKE_PROJECT/$CORE_IMAGE:${{ needs.create-tag.outputs.tag_to_deploy }} , gcr.io/$GKE_PROJECT/$CORE_IMAGE:$GITHUB_SHA , gcr.io/$GKE_PROJECT/$CORE_IMAGE:latest"
-          
-          docker build \
-          --build-arg GITHUB_SHA="$GITHUB_SHA" \
-          --build-arg GITHUB_REF="${GITHUB_REF##*/}" \
-          -t gcr.io/"$GKE_PROJECT"/"$CORE_IMAGE":"$GITHUB_SHA" \
-          -t gcr.io/"${{ secrets.GKE_PROJECT_ALTER }}"/"$ALTER_IMAGE":"$GITHUB_SHA" \
-          .
-          docker push gcr.io/$GKE_PROJECT/$CORE_IMAGE --all-tags
-          docker push gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/$ALTER_IMAGE --all-tags
-        
-        else
-          echo -e "\e[1;34m [INFO] Docker img already exists. skip building. tag and push"
-          echo -e "\e[1;34m push images - gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/$ALTER_IMAGE:latest , gcr.io/$GKE_PROJECT/$CORE_IMAGE:${{ needs.create-tag.outputs.tag_to_deploy }} , gcr.io/$GKE_PROJECT/$CORE_IMAGE:$GITHUB_SHA , gcr.io/$GKE_PROJECT/$CORE_IMAGE:latest"
-          
-          
-          gcloud container images add-tag gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:1431e85e976d94e3b9584a26f963ae05c17394db \
-          gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:test3
-          
-          # gcloud container images add-tag gcr.io/${{ secrets.GKE_PROJECT_ALTER }}/${{ env.ALTER_IMAGE }}:$GITHUB_SHA \ 
-          # gcr.io/"$GKE_PROJECT"/"$CORE_IMAGE":"$GITHUB_SHA" 
-        fi 
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+        fetch-depth: '0'
+    - name: create-tags-and-branches
+      uses: ./tmp/workiz-actions/create-tags-and-branches
+      with: 
+        CREATE_RC_TAGS: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        ANOTHER_REPO: nehora
+    
