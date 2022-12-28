@@ -24,7 +24,6 @@
     "@workiz/generator-micro-service": "^1.2.6",
     "@workiz/generator-micro-service-ts": "^1.2.8",
     "@workiz/message-bus": "^2.1.3",
-    "@workiz/node-logger": "1.0.5",
     "audit-ci": "^5.1.2",
     "axios": "^0.24.0",
     "body-parser": "^1.19.0",
@@ -41,6 +40,7 @@
     "prom-client": "^14.0.1",
     "redis": "^4.0.0",
     "sequelize": "^6.12.0-beta.1",
+    "socket.io-client": "2.0.0",
     "uuid": "^8.3.2",
     "uuidv4": "^6.2.12",
     "winston": "^3.3.3"
