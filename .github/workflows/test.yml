@@ -33,4 +33,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
         ANOTHER_REPO: nehora
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
     
