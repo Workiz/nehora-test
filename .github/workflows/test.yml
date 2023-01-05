@@ -22,12 +22,12 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: DEVOPS-738-hotfix-create-tags-to-backend-and-front-on-hotfix
+        ref: DEVOPS-757-deploy-prod-fix-hotfix-pr
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
-    - name: create-tags-and-branches
-      uses: ./tmp/workiz-actions/create-tags-and-branches
+    - name: hotfix-pr
+      uses: ./tmp/workiz-actions/hotfix-pr
       with: 
         CREATE_RC_TAGS: false
       env:
