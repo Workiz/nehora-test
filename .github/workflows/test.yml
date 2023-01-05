@@ -31,7 +31,7 @@ jobs:
       with: 
         CREATE_RC_TAGS: false
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         ANOTHER_REPO: nehora
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
     
