@@ -14,13 +14,13 @@ jobs:
         with:
           repository: Workiz/E2E-api-tests
           ref: workiz.com
-          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          token: ${{ secrets.GH_TOKEN_REPOS }}
       - name: Checkout shared actions
         uses: actions/checkout@v3
         with:
           repository: Workiz/workiz-actions
           ref: workiz.com
-          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          token: ${{ secrets.GH_TOKEN_REPOS }}
           path: ./tmp/workiz-actions
       - name: Send slack msg 
         uses: ./tmp/workiz-actions/slack-msg
