@@ -19,6 +19,8 @@ jobs:
         fetch-depth: '0'
     - name: init
       uses: ./tmp/workiz-actions/init-action
+      env:
+        CHECK_DOUBLE_RUN: true
     - name: sleep
       run: sleep 10
       shell: bash
