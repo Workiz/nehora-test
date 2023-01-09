@@ -22,6 +22,6 @@ jobs:
       env:
         CHECK_DOUBLE_RUN: true
     - name: sleep
-      run: sleep 10
+      run: sleep 20
       shell: bash
     
