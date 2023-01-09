@@ -6,23 +6,42 @@ on:
 
 jobs:
 
-  progress-bar:
+  run-api-tests:
+    name: Run api tests
     runs-on: ubuntu-latest
-    steps: 
-    - name: Check out workiz-actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: DEVOPS-766-cicd-check-if-there-is-a-way-to-stop-a-github-workflow-if-already-running
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-        fetch-depth: '0'
-    - name: init
-      uses: ./tmp/workiz-actions/init-action
-      env:
-        CHECK_DOUBLE_RUN: true
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-    - name: sleep
-      run: sleep 20
-      shell: bash
-    
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: Workiz/E2E-api-tests
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      - name: Checkout shared actions
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/workiz-actions
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          path: ./tmp/workiz-actions
+      - name: Send slack msg 
+        uses: ./tmp/workiz-actions/slack-msg
+        with:
+          CHANNEL: 'qa-automation'
+          MESSAGE: ':cool-doge: API tests started running on RC,as a part of train.'
+          SUCCESS: true
+          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+          LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+      - name: install correct node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - run: npm ci
+      - run: npm run testRc
+      - name: Send failure slack msg 
+        if: failure()  
+        uses: ./tmp/workiz-actions/slack-msg
+        with:
+          CHANNEL: 'release-committee'
+          MESSAGE: ':face_with_head_bandage: Something went wrong with API tests during train.'
+          SUCCESS: false
+          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+          LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
