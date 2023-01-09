@@ -25,7 +25,7 @@ jobs:
       - name: Send slack msg 
         uses: ./tmp/workiz-actions/slack-msg
         with:
-          CHANNEL: 'qa-automation'
+          CHANNEL: 'nehoramoshe'
           MESSAGE: ':cool-doge: API tests started running on RC,as a part of train.'
           SUCCESS: true
           WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
@@ -40,7 +40,7 @@ jobs:
         if: failure()  
         uses: ./tmp/workiz-actions/slack-msg
         with:
-          CHANNEL: 'release-committee'
+          CHANNEL: 'nehoramoshe'
           MESSAGE: ':face_with_head_bandage: Something went wrong with API tests during train.'
           SUCCESS: false
           WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
