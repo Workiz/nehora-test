@@ -9,28 +9,17 @@ jobs:
   progress-bar:
     runs-on: ubuntu-latest
     steps: 
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Checkout nehora
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/nehora
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/nehora
     - name: Check out workiz-actions
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: workiz.com
+        ref: DEVOPS-766-cicd-check-if-there-is-a-way-to-stop-a-github-workflow-if-already-running
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
         fetch-depth: '0'
-    - name: create-tags-and-branches
-      uses: ./tmp/workiz-actions/create-tags-and-branches
-      with: 
-        CREATE_RC_TAGS: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
-        ANOTHER_REPO: nehora
+    - name: init
+      uses: ./tmp/workiz-actions/init-action
+    - name: sleep
+      run: sleep 10
+      shell: bash
     
