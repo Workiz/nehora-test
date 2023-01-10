@@ -19,5 +19,5 @@ jobs:
       - name: Send slack msg 
         uses: ./tmp/workiz-actions/init-action
         env:
-          WORKFLOW_FILE: 'test1.yml'
           CHECK_DOUBLE_RUN: true
+      - run: sleep 20
