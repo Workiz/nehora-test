@@ -19,7 +19,6 @@ jobs:
       - name: Send slack msg 
         uses: ./tmp/workiz-actions/init-action
         env:
-          WORKFLOW_FILE: "test1.yml"
           CHECK_DOUBLE_RUN: true
           WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
       - run: sleep 20
