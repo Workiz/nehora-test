@@ -9,6 +9,6 @@ jobs:
     name: Run api tests
     runs-on: ubuntu-latest
     steps:
-      - uses: google-github-actions/auth@v1
+      - uses: google-github-actions/auth@v0
         with:
           credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
