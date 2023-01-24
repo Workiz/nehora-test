@@ -9,16 +9,6 @@ jobs:
     name: Run api tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout shared actions
-        uses: actions/checkout@v3
+      - uses: google-github-actions/auth@v1
         with:
-          repository: Workiz/workiz-actions
-          ref: DEVOPS-766-cicd-check-if-there-is-a-way-to-stop-a-github-workflow-if-already-running
-          token: ${{ secrets.GH_TOKEN_REPOS }}
-          path: ./tmp/workiz-actions
-      - name: Send slack msg 
-        uses: ./tmp/workiz-actions/init-action
-        env:
-          CHECK_DOUBLE_RUN: true
-          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-      - run: sleep 20
+          credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
