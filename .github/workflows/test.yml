@@ -6,6 +6,7 @@ env:
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
   NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}  
   ASSETS_RC_PATH_URL: "https://assets-rc.workiz.com" 
+  FRONTEND_ASSETS_RC_BUCKET_PATH: nehoratest
 
 jobs:
   upload:
@@ -49,6 +50,6 @@ jobs:
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
         path: '/var/tmp/'
-        destination: 'nehoratest/${{github.sha}}'
+        destination: '${{env.FRONTEND_ASSETS_RC_BUCKET_PATH}}/${{github.sha}}'
         glob: 'bundle.js*'
         parent: false
