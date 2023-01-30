@@ -49,6 +49,6 @@ jobs:
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
         path: '_assets'
-        destination: '${{env.BACKEND_ASSETS_RC_BUCKET_PATH}}/${{github.sha}}/_assets'
+        destination: '${{env.FRONTEND_ASSETS_RC_BUCKET_PATH}}/${{github.sha}}/_assets'
         # glob: 'bundle.js*'
         # parent: false
