@@ -51,3 +51,4 @@ jobs:
         path: '/var/tmp/'
         destination: 'nehoratest/${{github.sha}}'
         glob: 'bundle.js*'
+        parent: false
