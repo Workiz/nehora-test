@@ -16,40 +16,39 @@ jobs:
       id-token: 'write'
 
     steps:
-    - name: Checkout frontend
+    - name: Checkout
       uses: actions/checkout@v3
       with:
-        repository: Workiz/frontend
+          repository: Workiz/backend
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./
+        path: ./tmp/workiz-actions
     - uses: google-github-actions/auth@v1
       with:
-        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-    # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+        credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
     - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v0'
-    - name: install correct node version
-      uses: actions/setup-node@v3
+      uses: 'google-github-actions/setup-gcloud@v0' 
+    - run: |
+        gcloud components install beta
+    - uses: actions/setup-node@v3
       with:
         node-version-file: '.nvmrc'
         cache: 'npm'
-    - name: use env-rc.js for ci
-      run: mv env-rc.js env.js
-    - name: install npm modules with npm ci
-      run: npm ci
-    - name: build bundle.js
-      if: success()
-      run: |
-        ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA" npm run build-ci
-    # - name: push to workiz-frontend-assets-rc bucket
-    #   if: success()
-    #   run: |
-    #     gsutil -m cp -z js /var/tmp/bundle.js* gs://$FRONTEND_ASSETS_RC_BUCKET_PATH/$GITHUB_SHA/
-    - id: 'upload-folder'
+    - name: Build and push backend assets
+      run: |-
+        npm ci
+        ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA/" npm run build
+        # gsutil -m cp -z js,css,html,json,ico,eot,otf,ttf,gif,jpeg,jpg,png,tiff  -a public-read  -r _assets/*   gs://$BACKEND_ASSETS_RC_BUCKET_PATH/$GITHUB_SHA/_assets
+    - name: push to workiz-frontend-assets-rc bucket
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: '/var/tmp/'
-        destination: '${{env.FRONTEND_ASSETS_RC_BUCKET_PATH}}/${{github.sha}}'
-        glob: 'bundle.js*'
-        parent: false
+        path: '_assets'
+        destination: '${{env.BACKEND_ASSETS_RC_BUCKET_PATH}}/${{github.sha}}/_assets'
+        # glob: 'bundle.js*'
+        # parent: false
