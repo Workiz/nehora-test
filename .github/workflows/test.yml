@@ -4,13 +4,47 @@ on:
     
 
 jobs:
-
-  run-api-tests:
-    name: Run api tests
+  upload:
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
     steps:
-      - name: Checkout 
-        uses: actions/checkout@v3
-      - uses: google-github-actions/auth@v0
-        with:
-          credentials_json: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
+    - name: Checkout frontend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/frontend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./
+    - uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v0'
+    - name: install correct node version
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: use env-rc.js for ci
+      run: mv env-rc.js env.js
+    - name: install npm modules with npm ci
+      run: npm ci
+    - name: unit test
+      run: npm run test 
+    - name: build bundle.js
+      if: success()
+      run: |
+        ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA" npm run build-ci
+    # - name: push to workiz-frontend-assets-rc bucket
+    #   if: success()
+    #   run: |
+    #     gsutil -m cp -z js /var/tmp/bundle.js* gs://$FRONTEND_ASSETS_RC_BUCKET_PATH/$GITHUB_SHA/
+    - id: 'upload-folder'
+      uses: 'google-github-actions/upload-cloud-storage@v1'
+      with:
+        path: '/var/tmp/bundle.js*'
+        destination: 'nehoratest/$GITHUB_SHA'
