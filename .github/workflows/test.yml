@@ -44,12 +44,12 @@ jobs:
       run: |-
         npm ci
         ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA/" npm run build
-        gsutil -m cp -z js,css,html,json,ico,eot,otf,ttf,gif,jpeg,jpg,png,tiff  -a public-read  -r _assets/*   gs://$FRONTEND_ASSETS_RC_BUCKET_PATH/$GITHUB_SHA/with_z/_assets
+        gsutil -m cp -z js,css,html,json,ico,eot,otf,ttf,gif,jpeg,jpg,png,tiff  -a public-read  -r _assets/*   gs://$FRONTEND_ASSETS_RC_BUCKET_PATH/with_z/$GITHUB_SHA/_assets
     - name: Build and push backend assets
       run: |-
         npm ci
         ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA/" npm run build
-        gsutil -m cp  -a public-read  -r _assets/*   gs://$FRONTEND_ASSETS_RC_BUCKET_PATH/$GITHUB_SHA/_assets
+        gsutil -m cp  -a public-read  -r _assets/*   gs://$FRONTEND_ASSETS_RC_BUCKET_PATH/without_z/$GITHUB_SHA/_assets
     # - name: push to workiz-frontend-assets-rc bucket
     #   uses: 'google-github-actions/upload-cloud-storage@v1'
     #   with:
