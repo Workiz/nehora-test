@@ -48,6 +48,6 @@ jobs:
     - id: 'upload-folder'
       uses: 'google-github-actions/upload-cloud-storage@v1'
       with:
-        path: '/var/tmp'
-        destination: 'nehoratest/$GITHUB_SHA'
+        path: '/var/tmp/'
+        destination: 'nehoratest/${{github.sha}}'
         glob: 'bundle.js*'
