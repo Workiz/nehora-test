@@ -15,7 +15,7 @@ jobs:
       with:
         repository: Workiz/nehora
         ref: ${{ github.ref_name }}
-        token: ${{github.token}}
+        token: ${{ secrets.GH_TOKEN_REPOS }}
         path: nehora
         set-safe-directory: nehora
     - name: create empty commit
