@@ -4,7 +4,7 @@ on:
   branches:    
     - 'rc*'
   paths:
-    - '*'
+    - '**'
 jobs:
   send-slack-msg:
     name: send slack msg on update rc branch
@@ -27,4 +27,3 @@ jobs:
             echo "This is the first commit of branch"
             exit 1
           fi
-          
