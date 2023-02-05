@@ -1,28 +1,29 @@
-name: AAA
+name: send slack msg on update rc branch
 on:
-  workflow_dispatch:
-  push:
-
+ push:
+  branches:    
+    - 'rc*'
+  paths:
+    - '*'
 jobs:
-  create-commit:
-    name: push commit to nehora
+  send-slack-msg:
+    name: send slack msg on update rc branch
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-    - name: Checkout nehora
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/nehora
-        ref: ${{ github.ref_name }}
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: nehora
-        set-safe-directory: nehora
-    - name: create empty commit
-      id: empty-commit
-      run: |
-        cd nehora
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git commit --allow-empty -m "Empty commit from frontend with commit ${{ github.sha }}"
-        git push
+    - name: check if first commit
+      run: |-
+          echo "GITHUB_REF_NAME $GITHUB_REF_NAME"
+          git config --global --add safe.directory /github/workspace
+          git pull
+          git checkout workiz.com
+          git pull
+          git checkout $GITHUB_REF_NAME
+          
+          diff=$(git cherry -v workiz.com)
+          echo "diff $diff"
+          if [[ "$diff" == "" ]]; then 
+            echo "This is the first commit of branch"
+            exit 1
+          fi
