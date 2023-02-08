@@ -11,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout shared actions
-        run: echo ${{ github.event.tag }}
+        run: echo ${{ github.event.client_payload.tag }}
