@@ -11,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout shared actions
-        run: sleep 5
+        run: echo ${{ github.event.tag }}
