@@ -1,6 +1,7 @@
 name: TEST1
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [train]
     
 
 jobs:
@@ -10,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout shared actions
-        run: sleep 30
+        run: sleep 5
