@@ -21,3 +21,4 @@ jobs:
         -H "Authorization: ${{ secrets.GH_TOKEN_REPOS }}" \
         https://api.github.com/repos/Workiz/nehora-test/dispatches \
         -d '{"event_type":"train","client_payload":{"tag":"$tag","branch": "$branch" }}'
+        
