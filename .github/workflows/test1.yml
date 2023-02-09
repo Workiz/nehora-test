@@ -1,7 +1,7 @@
 name: TEST1
 on:
-  repository_dispatch:
-    types: [train]
+  workflow_dispatch:
+    
     
 
 jobs:
