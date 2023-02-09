@@ -1,6 +1,6 @@
 name: TEST
 on:
-  workflow_dispatch:
+  push:
     
    
 jobs:
@@ -10,8 +10,14 @@ jobs:
     steps:
     - name: Checkout
       run: | 
-        curl --location --request POST 'https://infra-api-staging.workiz.com/github/new_release_pr/' \
-        --header 'Content-Type: application/json' \
-        --data-raw '{
-            "github_token" : "${{ secrets.GH_TOKEN_REPOS }}"
-        }'
+        # curl --location --request POST 'https://infra-api-staging.workiz.com/github/new_release_pr/' \
+        # --header 'Content-Type: application/json' \
+        # --data-raw '{
+        #     "github_token" : "${{ secrets.GH_TOKEN_REPOS }}"
+        # }'
+        tag="123"
+        branch="123-branch"
+        curl -X POST -H "Accept: application/vnd.github+json" \
+        -H "Authorization: ${{ secrets.GH_TOKEN_REPOS }}" \
+        https://api.github.com/repos/Workiz/nehora-test/dispatches \
+        -d '{"event_type":"train","client_payload":{"tag":"$tag","branch": "$branch" }}'
