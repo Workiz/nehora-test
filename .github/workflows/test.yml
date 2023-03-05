@@ -3,22 +3,72 @@ on:
   push:
     
    
-jobs:
+jobs: 
   send-slack-msg:
-    name: send slack msg on update rc branch
+    needs: [create-release]
+    name: send slack msg
+    outputs:
+      msg: ${{ steps.releases-msg.outputs.msg }}
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout backend
+      uses: actions/checkout@v3 
+    - name: Checkout frontend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/nehora
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/frontend
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-877-github-release-notes-should-be-with-p-rs
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: releases-msg
+      id: releases-msg
+      uses: ./tmp/workiz-actions/releases-msg
+      with:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+  
+  create-release:
+    name: create-release-from-tag
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      run: | 
-        # curl --location --request POST 'https://infra-api-staging.workiz.com/github/new_release_pr/' \
-        # --header 'Content-Type: application/json' \
-        # --data-raw '{
-        #     "github_token" : "${{ secrets.GH_TOKEN_REPOS }}"
-        # }'
-        tag="123"
-        branch="123-branch"
-        curl -X POST -H "Accept: application/vnd.github+json" \
-        -H "Authorization: ${{ secrets.GH_TOKEN_REPOS }}" \
-        https://api.github.com/repos/Workiz/nehora-test/dispatches \
-        -d '{"event_type":"train","client_payload":{"tag":"$tag","branch": "$branch" }}'
+      - name: Checkout backend
+        uses: actions/checkout@v3
+      - name: Checkout shared actions
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/workiz-actions
+          ref: workiz.com
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          path: ./tmp/workiz-actions
+      - name: create backend release
+        run: | 
+          git config --global --add safe.directory /github/workspace
+          git fetch --tags
+          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1)
+          git_refs_response=$(
+          curl -s -X POST https://api.github.com/repos/Workiz/backend/releases \
+          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
+          -d @- << EOF
+          {
+          "tag_name":"$LAST_TAG" , 
+          "body":${{ needs.send-slack-msg.outputs.msg }}
+          }
+          EOF
+          )
+          git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
+          echo "::debug::${git_refs_response}"
+          if [ "${git_ref_posted}" = "$LAST_TAG" ]; then
+          echo "backend release created"
+          else
+          echo "::error::backend Realse was not created properly."
+          exit 1
+          fi
+  
         
