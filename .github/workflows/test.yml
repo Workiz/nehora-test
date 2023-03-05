@@ -58,7 +58,7 @@ jobs:
           -d @- << EOF
           {
           "tag_name":"$LAST_TAG" , 
-          "body":${{ needs.send-slack-msg.outputs.msg }}
+          "body":"${{ needs.send-slack-msg.outputs.msg }}"
           }
           EOF
           )
