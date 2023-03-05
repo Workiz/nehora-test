@@ -5,7 +5,6 @@ on:
    
 jobs: 
   send-slack-msg:
-    needs: [create-release]
     name: send slack msg
     outputs:
       msg: ${{ steps.releases-msg.outputs.msg }}
@@ -35,6 +34,7 @@ jobs:
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
   
   create-release:
+    needs: [send-slack-msg]
     name: create-release-from-tag
     runs-on: ubuntu-latest
     steps:
