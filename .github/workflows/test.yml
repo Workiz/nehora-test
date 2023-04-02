@@ -33,6 +33,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
   
+  
   create-release:
     needs: [send-slack-msg]
     name: create-release-from-tag
