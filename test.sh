@@ -9,7 +9,6 @@
         
 #         echo "${BASH_REMATCH[1]}" 
 # fi
-
 tag="123"
 branch="123-branch"
 # curl -X POST -H "Accept: application/vnd.github+json" \
