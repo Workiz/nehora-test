@@ -57,3 +57,4 @@ jobs:
       uses: ./tmp/workiz-actions/cypress-tests
       with:
         CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+        GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
