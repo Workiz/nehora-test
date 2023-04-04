@@ -6,70 +6,19 @@ on:
 jobs: 
   send-slack-msg:
     name: send slack msg
-    outputs:
-      msg: ${{ steps.releases-msg.outputs.msg }}
     runs-on: ubuntu-latest
     steps: 
-    - name: Checkout backend
-      uses: actions/checkout@v3 
-    - name: Checkout frontend
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/nehora
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/nehora
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
         repository: Workiz/workiz-actions
-        ref: DEVOPS-877-github-release-notes-should-be-with-p-rs
+        ref: DEVOPS-944-train-run-cypress-as-part-of-train
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: releases-msg
-      id: releases-msg
-      uses: ./tmp/workiz-actions/releases-msg
+    - name: e2e-tests
+      id: e2e-tests
+      uses: ./tmp/workiz-actions/e2e-tests
       with:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-  
-  
-  create-release:
-    needs: [send-slack-msg]
-    name: create-release-from-tag
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout backend
-        uses: actions/checkout@v3
-      - name: Checkout shared actions
-        uses: actions/checkout@v3
-        with:
-          repository: Workiz/workiz-actions
-          ref: workiz.com
-          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-          path: ./tmp/workiz-actions
-      - name: create backend release
-        run: | 
-          git config --global --add safe.directory /github/workspace
-          git fetch --tags
-          LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1)
-          git_refs_response=$(
-          curl -s -X POST https://api.github.com/repos/Workiz/backend/releases \
-          -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
-          -d @- << EOF
-          {
-          "tag_name":"$LAST_TAG" , 
-          "body":"${{ needs.send-slack-msg.outputs.msg }}"
-          }
-          EOF
-          )
-          git_ref_posted=$( echo "${git_refs_response}" | jq .tag_name | tr -d '"' )
-          echo "::debug::${git_refs_response}"
-          if [ "${git_ref_posted}" = "$LAST_TAG" ]; then
-          echo "backend release created"
-          else
-          echo "::error::backend Realse was not created properly."
-          exit 1
-          fi
-  
-        
+        TAG: "v3.333"
+        BRANCH: "v3.333-branch"
+        GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
