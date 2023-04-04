@@ -4,14 +4,46 @@ on:
     
    
 jobs: 
-  send-slack-msg:
-    name: send slack msg
-    runs-on: ubuntu-latest
+  # e2e-tests:
+  #   name: send slack msg
+  #   runs-on: ubuntu-latest
+  #   steps: 
+  #   - name: Checkout e2e tests
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: Workiz/E2E-api-tests
+  #       ref: workiz.com
+  #       token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+  #   - name: Checkout shared actions
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: Workiz/workiz-actions
+  #       ref: DEVOPS-944-train-run-cypress-as-part-of-train
+  #       token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+  #       path: ./tmp/workiz-actions
+  #   - name: e2e-tests
+  #     id: e2e-tests
+  #     uses: ./tmp/workiz-actions/e2e-tests
+  #     with:
+  #       TAG: "v3.333"
+  #       BRANCH: "v3.333-branch"
+  #       GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
+  cypress-tests:
+    timeout-minutes: 360
+    runs-on: workiz-cypress
+    container:
+      image: cypress/browsers:node16.17.0-chrome106
+      options: --user 1000
+    strategy:
+      fail-fast: false
+      matrix:
+        # run copies of the current job in parallel
+        containers: [1, 2, 3, 4, 5]
     steps: 
     - name: Checkout e2e tests
       uses: actions/checkout@v3
       with:
-        repository: Workiz/E2E-api-tests
+        repository: Workiz/workiz-cypress-automation
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
     - name: Checkout shared actions
@@ -22,9 +54,6 @@ jobs:
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
     - name: e2e-tests
-      id: e2e-tests
-      uses: ./tmp/workiz-actions/e2e-tests
+      uses: ./tmp/workiz-actions/cypress-tests
       with:
-        TAG: "v3.333"
-        BRANCH: "v3.333-branch"
-        GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
+        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
