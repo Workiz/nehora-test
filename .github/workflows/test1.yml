@@ -19,4 +19,4 @@ jobs:
       - name: init
         uses: ./tmp/workiz-actions/init-action
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
