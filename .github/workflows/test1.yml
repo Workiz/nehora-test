@@ -10,9 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout shared actions
-        uses: workiz-actions/slack-msg@workiz.com
+        uses: actions/checkout@v3
         with:
-          CHANNEL: 'nehoramoshe'
-          MESSAGE: ':octagonal_sign: Train didnt run, since it was locked.:lock:'
-          SUCCESS: false
-          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+          repository: Workiz/workiz-actions
+          ref: DEVOPS-939-axiom-total-lockdown
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+          path: ./tmp/workiz-actions
+      - name: init
+        uses: ./tmp/workiz-actions/init-action
