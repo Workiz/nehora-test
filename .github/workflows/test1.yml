@@ -18,3 +18,5 @@ jobs:
           path: ./tmp/workiz-actions
       - name: init
         uses: ./tmp/workiz-actions/init-action
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
