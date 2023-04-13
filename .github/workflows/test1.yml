@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout shared actions
-        uses: actions/workiz-actions/slack-msg@workiz.com
+        uses: workiz-actions/slack-msg@workiz.com
         with:
           CHANNEL: 'nehoramoshe'
           MESSAGE: ':octagonal_sign: Train didnt run, since it was locked.:lock:'
