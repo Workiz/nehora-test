@@ -1,8 +1,6 @@
 name: TEST1
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [train]
     
 
 jobs:
@@ -12,4 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout shared actions
-        run: echo ${{ github.event.client_payload.tag }}
+        uses: actions/slack-msg@workiz.com
+        with:
+          CHANNEL: 'nehoramoshe'
+          MESSAGE: ':octagonal_sign: Train didnt run, since it was locked.:lock:'
+          SUCCESS: false
+          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
