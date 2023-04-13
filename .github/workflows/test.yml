@@ -22,7 +22,6 @@ jobs:
         repository: Workiz/workiz-cypress-automation
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-cypress-automation
     - name: Checkout shared actions
       uses: actions/checkout@v3
       with:
