@@ -5,16 +5,17 @@ on:
    
 jobs: 
   cypress-tests:
-    timeout-minutes: 360
-    runs-on: workiz-cypress
-    container:
-      image: cypress/browsers:node16.17.0-chrome106
-      options: --user 1000
-    strategy:
-      fail-fast: false
-      matrix:
-        # run copies of the current job in parallel
-        containers: [1]
+    runs-on: ubuntu-latest
+    # timeout-minutes: 360
+    # runs-on: workiz-cypress
+    # container:
+    #   image: cypress/browsers:node16.17.0-chrome106
+    #   options: --user 1000
+    # strategy:
+    #   fail-fast: false
+    #   matrix:
+    #     # run copies of the current job in parallel
+    #     containers: [1]
     steps: 
     - name: Checkout e2e tests
       uses: actions/checkout@v3
@@ -22,15 +23,21 @@ jobs:
         repository: Workiz/workiz-cypress-automation
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: DEVOPS-944-train-run-cypress-as-part-of-train
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-    - name: e2e-tests
-      uses: ./tmp/workiz-actions/cypress-tests
-      with:
-        CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    # - name: Checkout shared actions
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/workiz-actions
+    #     ref: DEVOPS-944-train-run-cypress-as-part-of-train
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    #     path: ./tmp/workiz-actions
+    # - name: e2e-tests
+    #   uses: ./tmp/workiz-actions/cypress-tests
+    #   with:
+    #     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+    #     GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+  call-workflow-passing-data:
+    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@workiz.com
+    with:
+      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+      GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    secrets: inherit
