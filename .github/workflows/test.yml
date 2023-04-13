@@ -40,6 +40,6 @@ jobs:
     #     GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
   call-workflow-passing-data:
     uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-944-train-run-cypress-as-part-of-train
-    with:
-      CYPRESS_RECORD_KEY: $CYPRESS_RECORD_KEY
-      GH_TOKEN_MARKIZ_BOT: $GH_TOKEN_MARKIZ_BOT
+    # with:
+    #   CYPRESS_RECORD_KEY: $CYPRESS_RECORD_KEY
+    #   GH_TOKEN_MARKIZ_BOT: $GH_TOKEN_MARKIZ_BOT
