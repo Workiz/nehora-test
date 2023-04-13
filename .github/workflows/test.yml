@@ -2,10 +2,13 @@ name: TEST
 on:
   workflow_dispatch:
     
-   
+env:
+  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+  GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+
 jobs: 
-  cypress-tests:
-    runs-on: ubuntu-latest
+  # cypress-tests:
+  #   runs-on: ubuntu-latest
     # timeout-minutes: 360
     # runs-on: workiz-cypress
     # container:
@@ -16,13 +19,13 @@ jobs:
     #   matrix:
     #     # run copies of the current job in parallel
     #     containers: [1]
-    steps: 
-    - name: Checkout e2e tests
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-cypress-automation
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    # steps: 
+    # - name: Checkout e2e tests
+    #   uses: actions/checkout@v3
+    #   with:
+    #     repository: Workiz/workiz-cypress-automation
+    #     ref: workiz.com
+    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
     # - name: Checkout shared actions
     #   uses: actions/checkout@v3
     #   with:
@@ -38,5 +41,5 @@ jobs:
   call-workflow-passing-data:
     uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-944-train-run-cypress-as-part-of-train
     with:
-      CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-      GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      CYPRESS_RECORD_KEY: $CYPRESS_RECORD_KEY
+      GH_TOKEN_MARKIZ_BOT: $GH_TOKEN_MARKIZ_BOT
