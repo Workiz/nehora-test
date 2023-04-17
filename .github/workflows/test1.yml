@@ -5,18 +5,58 @@ on:
 
 jobs:
 
-  run-api-tests:
-    name: Run api tests
+  Percy-tests:
+    name: E2E api tests
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout shared actions
-        uses: actions/checkout@v3
-        with:
-          repository: Workiz/workiz-actions
-          ref: DEVOPS-939-axiom-total-lockdown
-          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-          path: ./tmp/workiz-actions
-      - name: init
-        uses: ./tmp/workiz-actions/init-action
-        env:
-          WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+    steps: 
+    - name: Checkout e2e tests
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/percy-visual-automation
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: e2e-tests
+      id: e2e-tests
+      uses: ./tmp/workiz-actions/e2e-tests
+      with:
+        TAG: "tag"
+        BRANCH: "branch"
+        GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
+  E2E-api-tests:
+    name: E2E api tests
+    runs-on: ubuntu-latest
+    steps: 
+    - name: Checkout e2e tests
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/E2E-api-tests
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: e2e-tests
+      id: e2e-tests
+      uses: ./tmp/workiz-actions/e2e-tests
+      with:
+        TAG: "tag"
+        BRANCH: "branch"
+        GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
+  run-cypress-tests:
+    name: run cypress tests
+    needs: [deploy-helm-rc-chart,create-rc-branches-and-tags]
+    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@workiz.com
+    secrets: inherit
+    with: 
+      tag: "tag1"

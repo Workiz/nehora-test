@@ -21,6 +21,7 @@
   "homepage": "https://github.com/Workiz/architecture/templates/generator-micro-service",
   "dependencies": {
     "@google-cloud/secret-manager": "^3.10.1",
+    "@octokit/core": "^4.2.0",
     "@workiz/generator-micro-service": "^1.2.6",
     "@workiz/generator-micro-service-ts": "^1.2.8",
     "@workiz/message-bus": "^2.1.3",

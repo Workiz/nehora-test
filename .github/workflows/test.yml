@@ -38,13 +38,13 @@ jobs:
     #   with:
     #     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
     #     GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-  check-envs:
-    runs-on: workiz-cypress
-    container:
-      image: cypress/browsers:node16.17.0-chrome106
-      options: --user 1000 
-    steps: 
-    - run: env
+  # check-envs:
+  #   runs-on: workiz-cypress
+  #   container:
+  #     image: cypress/browsers:node16.17.0-chrome106
+  #     options: --user 1000 
+  #   steps: 
+  #   - run: env
 
   call-workflow-passing-data:
     uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-944-train-run-cypress-as-part-of-train
