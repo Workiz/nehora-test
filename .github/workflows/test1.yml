@@ -55,7 +55,6 @@ jobs:
         GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
   run-cypress-tests:
     name: run cypress tests
-    needs: [deploy-helm-rc-chart,create-rc-branches-and-tags]
     uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@workiz.com
     secrets: inherit
     with: 
