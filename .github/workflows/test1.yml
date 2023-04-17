@@ -6,7 +6,7 @@ on:
 jobs:
 
   Percy-tests:
-    name: E2E api tests
+    name: percy-tests
     runs-on: ubuntu-latest
     steps: 
     - name: Checkout e2e tests
@@ -22,9 +22,9 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: e2e-tests
-      id: e2e-tests
-      uses: ./tmp/workiz-actions/e2e-tests
+    - name: percy-tests
+      id: percy-tests
+      uses: ./tmp/workiz-actions/percy-tests
       with:
         TAG: "tag"
         BRANCH: "branch"
