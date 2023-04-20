@@ -7,6 +7,17 @@ env:
   GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
 
 jobs: 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - run: sleep 20
+  prepare:
+    runs-on: ubuntu-latest
+    name: Prepare to clone a new version
+    needs: [test]
+    if: ${{ cancelled() }}
+    steps:
+    - run: echo hi && sleep 20
   # cypress-tests:
   #   runs-on: ubuntu-latest
     # timeout-minutes: 360
@@ -46,12 +57,12 @@ jobs:
   #   steps: 
   #   - run: env
 
-  call-workflow-passing-data:
-    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-944-train-run-cypress-as-part-of-train
-    # secrets:
-    #   GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    #   CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-    secrets: inherit
+  # call-workflow-passing-data:
+  #   uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-944-train-run-cypress-as-part-of-train
+  #   # secrets:
+  #   #   GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+  #   #   CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+  #   secrets: inherit
     # with:
     #   CYPRESS_RECORD_KEY: $CYPRESS_RECORD_KEY
     #   GH_TOKEN_MARKIZ_BOT: $GH_TOKEN_MARKIZ_BOT
