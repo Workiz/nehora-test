@@ -1,68 +1,22 @@
 name: TEST
 on:
   workflow_dispatch:
-    
-env:
-  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-  GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
 
 jobs: 
   test:
     runs-on: ubuntu-latest
     steps:
-    - run: sleep 20
-  prepare:
+    - run: mkdir test1
+    - name: Upload a Build Artifact
+      if: always()
+      uses: actions/upload-artifact@v3
+      with: 
+          name: test1
+          path: test1
+  test1:
     runs-on: ubuntu-latest
     name: Prepare to clone a new version
     needs: [test]
-    if: ${{ cancelled() }}
     steps:
-    - run: echo hi && sleep 20
-  # cypress-tests:
-  #   runs-on: ubuntu-latest
-    # timeout-minutes: 360
-    # runs-on: workiz-cypress
-    # container:
-    #   image: cypress/browsers:node16.17.0-chrome106
-    #   options: --user 1000
-    # strategy:
-    #   fail-fast: false
-    #   matrix:
-    #     # run copies of the current job in parallel
-    #     containers: [1]
-    # steps: 
-    # - name: Checkout e2e tests
-    #   uses: actions/checkout@v3
-    #   with:
-    #     repository: Workiz/workiz-cypress-automation
-    #     ref: workiz.com
-    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    # - name: Checkout shared actions
-    #   uses: actions/checkout@v3
-    #   with:
-    #     repository: Workiz/workiz-actions
-    #     ref: DEVOPS-944-train-run-cypress-as-part-of-train
-    #     token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    #     path: ./tmp/workiz-actions
-    # - name: e2e-tests
-    #   uses: ./tmp/workiz-actions/cypress-tests
-    #   with:
-    #     CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-    #     GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-  # check-envs:
-  #   runs-on: workiz-cypress
-  #   container:
-  #     image: cypress/browsers:node16.17.0-chrome106
-  #     options: --user 1000 
-  #   steps: 
-  #   - run: env
-
-  # call-workflow-passing-data:
-  #   uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-944-train-run-cypress-as-part-of-train
-  #   # secrets:
-  #   #   GH_TOKEN_MARKIZ_BOT: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-  #   #   CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-  #   secrets: inherit
-    # with:
-    #   CYPRESS_RECORD_KEY: $CYPRESS_RECORD_KEY
-    #   GH_TOKEN_MARKIZ_BOT: $GH_TOKEN_MARKIZ_BOT
+    - run: ls
+ 
