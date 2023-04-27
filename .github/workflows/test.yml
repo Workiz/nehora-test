@@ -11,12 +11,15 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v3
       with: 
-          name: test1
+          name: test
           path: test1
   test1:
     runs-on: ubuntu-latest
     name: Prepare to clone a new version
     needs: [test]
     steps:
+    - uses: actions/download-artifact@v3
+      with:
+        name: test
     - run: ls
  
