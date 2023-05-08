@@ -1,7 +1,27 @@
 name: TEST
 on:
   workflow_dispatch:
-
+env:
+  ALTER_PROJECT_ID: ${{ secrets.GKE_PROJECT_ALTER }}
+  GKE_CLUSTER: wstgcluster
+  GKE_ZONE: us-central1-b   # TODO: update to cluster zone
+  K8S_IMAGE: backend-php
+  ENV: rc
+  K8S_NAMESPACE: rc
+  RELEASE_NAME: backend-php-rc
+  ASSETS_RC_PATH_URL: "https://assets-rc.workiz.com"
+  BACKEND_ASSETS_RC_BUCKET_PATH: workiz-backend-assets-rc
+  FRONTEND_ASSETS_RC_BUCKET_PATH: workiz-frontend-assets-rc
+  BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
+  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+  MIG:  preprod-ig
+  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
+  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
+  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
+  BRANCH: ${{ github.ref_name }}
+  BACKEND_PHP_HELM_VERSION: "0.1.0"
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
 jobs: 
   build-frontend-bundle-rc:
     name: build bundle.js & push to workiz-frontend-assets-rc bucket
