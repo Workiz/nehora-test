@@ -3,28 +3,29 @@ on:
   workflow_dispatch:
 
 jobs: 
-  test:
+  build-frontend-bundle-rc:
+    name: build bundle.js & push to workiz-frontend-assets-rc bucket
     runs-on: ubuntu-latest
     steps:
-    - run: mkdir test1; cd test1; touch test.txt
-    - run: mkdir test2; cd test2; touch test2.txt
-    - name: Upload a Build Artifact
-      if: always()
-      uses: actions/upload-artifact@v3
-      with: 
-          name: test
-          path: test1
-    - name: Upload a Build Artifact
-      if: always()
-      uses: actions/upload-artifact@v3
-      with: 
-          name: test_
-          path: test2
-  test1:
-    runs-on: ubuntu-latest
-    name: Prepare to clone a new version
-    needs: [test]
-    steps:
-    - uses: actions/download-artifact@v3
-    - run: ls
+    - name: Checkout frontend
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/frontend
+        ref: DEVOPS-998-frontend-sentry-add-tag-to-release-and-dist
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./
+    - name: install correct node version
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: use env-rc.js for ci
+      run: mv env-rc.js env.js
+    - name: install npm modules with npm ci
+      run: npm ci
+    - name: build bundle.js
+      if: success()
+      run: |
+        ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA" npm run build-rc
+
  
