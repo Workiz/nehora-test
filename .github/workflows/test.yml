@@ -26,6 +26,7 @@ jobs:
     - name: build bundle.js
       if: success()
       run: |
+        export SENTRY_RELEASE=rc2.111
         ASSETS_PATH="$ASSETS_RC_PATH_URL/$GITHUB_SHA" npm run build-rc
 
  
