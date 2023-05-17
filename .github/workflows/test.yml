@@ -18,7 +18,7 @@ jobs:
   
   run-cypress-tests:
     name: run cypress tests
-    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@workiz.com
+    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-1025-cypress-branch-checkout
     secrets: inherit
     with: 
       tag: rc111
