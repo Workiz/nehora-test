@@ -16,25 +16,9 @@ env:
 
 jobs:
   
-  build-fe-prod:
-    if: ${{ github.event_name == 'schedule' || github.event.inputs.run-automation == 'true' }}
-    name: build bundle.js
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: Workiz/frontend
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./
-
-  build-fe-prod-experimental:
-    name: build bundle.js
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        repository: Workiz/frontend
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./
+  run-cypress-tests:
+    name: run cypress tests
+    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@workiz.com
+    secrets: inherit
+    with: 
+      tag: rc111
