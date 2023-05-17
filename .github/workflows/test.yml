@@ -7,7 +7,7 @@ on:
         description: run-automation
         default: true
   schedule:
-    - cron: '* * * * *'
+    - cron: '*/1 * * * *'
 
 env: 
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
