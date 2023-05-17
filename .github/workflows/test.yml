@@ -1,28 +1,23 @@
 name: ☁️ deploy production K8S
 on:
   workflow_dispatch:
+    inputs:
+      run-automation:
+        type: boolean
+        description: run-automation
+        default: true
+  schedule:
+    - cron: '0 9 * * 0-4'
 
 env: 
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
   GKE_CLUSTER: wstgcluster
-  GKE_ZONE: us-central1-b
-  GITHUB_SHA: ${{ github.sha }}
-  ALTER_IMAGE: backend-php
-  AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}
-  AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}
-  BUCKET_PATH:  nehoratest/fe
-  ASSETS_PATH_URL: "https://assets.workiz.com"
-  ASSETS_BUCKET_PATH: assets.workiz.com
-  K8S_NAMESPACE: backend-php-prod
-  RELEASE_NAME: backend-php
-  BACKEND_PHP_HELM_VERSION: "0.1.0"
-  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  
+
 
 jobs:
   
   build-fe-prod:
+    if: ${{ github.event.inputs.run-automation == 'true' }}
     name: build bundle.js
     runs-on: ubuntu-latest
     steps:
@@ -32,35 +27,6 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./
-    - uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v0'
-    - name: install correct node version
-      uses: actions/setup-node@v3
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-    - name: install npm modules with npm ci
-      run: npm ci
-    - name: use env.js for ci
-      if: success()
-      run: mv env-ci.js env.js
-    - name: build asset
-      if: success()
-      run: |
-        export SENTRY_RELEASE=${{ needs.create-tag.outputs.tag_to_deploy }}
-        ASSETS_PATH="$ASSETS_PATH_URL/$GITHUB_SHA" npm run build-ci
-    - name: push to workiz-frontend-assets-rc bucket
-      uses: 'google-github-actions/upload-cloud-storage@v1'
-      with:
-        path: '/var/tmp/'
-        destination: '${{env.BUCKET_PATH}}/${{github.sha}}'
-        glob: 'bundle.js*'
-        parent: false
-    - name: copy bundle to latest
-      run: gsutil -m cp gs://$BUCKET_PATH/$GITHUB_SHA/* gs://$BUCKET_PATH/latest/
 
   build-fe-prod-experimental:
     name: build bundle.js
@@ -72,29 +38,3 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./
-    - uses: google-github-actions/auth@v1
-      with:
-        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v0'
-    - name: install correct node version
-      uses: actions/setup-node@v3
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-    - name: install npm modules with npm ci
-      run: npm ci
-    - name: use env.js for ci
-      if: success()
-      run: mv env-ci.js env.js
-    - name: build asset
-      if: success()
-      run: |
-        export SENTRY_RELEASE=${{ needs.create-tag.outputs.tag_to_deploy }}
-        ASSETS_PATH="$ASSETS_PATH_URL/$GITHUB_SHA" npm run build-ci-experimental
-    - name: push to workiz-frontend-assets-rc bucket
-      uses: 'google-github-actions/upload-cloud-storage@v1'
-      with:
-        path: '/var/tmp/experimental'
-        destination: '${{env.BUCKET_PATH}}/${{github.sha}}/experimental'
-        parent: false
