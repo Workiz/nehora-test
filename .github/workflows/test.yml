@@ -7,7 +7,7 @@ on:
         description: run-automation
         default: true
   schedule:
-    - cron: '0 9 * * 0-4'
+    - cron: '* * * * *'
 
 env: 
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
@@ -17,7 +17,7 @@ env:
 jobs:
   
   build-fe-prod:
-    if: ${{ github.event.inputs.run-automation }}
+    if: ${{ github.event.inputs.run-automation == 'true' }}
     name: build bundle.js
     runs-on: ubuntu-latest
     steps:
