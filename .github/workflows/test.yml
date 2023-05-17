@@ -6,8 +6,6 @@ on:
         type: boolean
         description: run-automation
         default: true
-  schedule:
-    - cron: '*/15 * * * *'
 
 env: 
   GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
