@@ -20,4 +20,4 @@ jobs:
       uses: ./tmp/workiz-actions/block-deployment
       with:
         ENV: "staging"
-        SERVICE_NAME: "service name"
+        SERVICE_NAME: "microservice-for-infra-tests"
