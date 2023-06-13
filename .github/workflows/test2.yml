@@ -21,3 +21,5 @@ jobs:
       with:
         ENV: "staging"
         SERVICE_NAME: "microservice-for-infra-tests"
+        ALTER_SA_GITHUB_ACTIONS_JSON_KEY: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+
