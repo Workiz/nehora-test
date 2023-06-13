@@ -1,0 +1,23 @@
+name: TEST2
+on:
+  workflow_dispatch:
+    
+jobs:
+
+  main-job:
+    name: main-job
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-1072-workiz-actions-check-lock-action
+        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+        path: ./tmp/workiz-actions
+    - name: Check lock
+      id: check-lock
+      uses: ./tmp/workiz-actions/block-deployment
+      with:
+        ENV: "staging"
+        SERVICE_NAME: "service name"
