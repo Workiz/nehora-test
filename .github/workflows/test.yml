@@ -1,4 +1,5 @@
-name: ☁️ deploy production K8S
+name: ☁️ TEST
+
 on:
   workflow_dispatch:
     inputs:
@@ -6,26 +7,70 @@ on:
         type: boolean
         description: run-automation
         default: true
+      new-rc:
+        type: boolean
+        description: create rc from workiz.com
+        default: false 
 
-env: 
-  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+env:
+  ALTER_PROJECT_ID: ${{ secrets.GKE_PROJECT_ALTER }}
   GKE_CLUSTER: wstgcluster
+  GKE_ZONE: us-central1-b   # TODO: update to cluster zone
+  K8S_IMAGE: backend-php
+  ENV: rc
+  K8S_NAMESPACE: rc
+  RELEASE_NAME: backend-php-rc
+  ASSETS_RC_PATH_URL: "https://assets-rc.workiz.com"
+  BACKEND_ASSETS_RC_BUCKET_PATH: workiz-backend-assets-rc
+  nehora_ASSETS_RC_BUCKET_PATH: workiz-nehora-assets-rc
+  BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
+  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+  MIG:  preprod-ig
+  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
+  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
+  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
+  BRANCH: ${{ github.ref_name }}
+  BACKEND_PHP_HELM_VERSION: "0.1.0"
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
 
 
 jobs:
-  build-frontend-bundle-rc:
-    name: build bundle.js & push to workiz-frontend-assets-rc bucket
+  create-rc-branches-and-tags:
+    outputs:
+      branch: ${{ steps.branch.outputs.branch }}
+      rc_tag: ${{ steps.branch.outputs.rc_tag }}
+    name: create nehora and backend branches and tags
     runs-on: ubuntu-latest
     steps:
-    - uses: google-github-actions/auth@v1
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout shared actions
+      uses: actions/checkout@v3
       with:
-        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-    # Install gcloud, `setup-gcloud` automatically picks up authentication from `auth`.
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v0'
-  # run-cypress-tests:
-  #   name: run cypress tests
-  #   uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@DEVOPS-1025-cypress-branch-checkout
-  #   secrets: inherit
-  #   with: 
-  #     tag: rc111
+        repository: Workiz/workiz-actions
+        ref: DEVOPS-1184-train-option-to-new-rc
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/workiz-actions
+    - name: Checkout nehora
+      uses: actions/checkout@v3
+      with:
+        repository: Workiz/nehora
+        ref: ${{ github.ref_name }}
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/nehora
+    - name: create branches and tags 
+      uses: ./tmp/workiz-actions/create-tags-and-branches
+      with: 
+        CREATE_RC_TAGS: true
+        NEW_RC: ${{ inputs.new-rc }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
+        ANOTHER_REPO: nehora
+    - name: set branch output
+      id: branch
+      run: |
+        echo "branch=${{ env.BRANCH }}" >> $GITHUB_OUTPUT
+        echo "rc_tag=${{ env.RC_TAG }}" >> $GITHUB_OUTPUT
+        echo "branch=${{ env.BRANCH }}"
+        echo "rc_tag=${{ env.RC_TAG }}"
