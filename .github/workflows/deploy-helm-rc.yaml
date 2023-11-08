@@ -1,0 +1,247 @@
+name: Deploy RC 👻
+
+on:
+  workflow_dispatch:
+    inputs:
+      frontend_branch:
+        description: 'frontend branch name'     
+        required: false
+        default: 'workiz.com'
+      release:
+        type: choice
+        description: Release Environment
+        required: true
+        default: infra-tests
+        options: 
+        - infra-tests
+        - demoinfra
+        - platform
+        - rc
+      app_version: 
+        type: string
+        description: App version
+        required: false
+        default: ${{ github.sha }}
+  workflow_call:
+    inputs:
+      frontend_branch:
+        description: 'frontend branch name'     
+        required: false
+        default: 'workiz.com'
+        type: string
+      release:
+        type: string
+        description: Release Environment
+        required: false
+        default: rc
+      app_version: 
+        type: string
+        description: App version
+        required: false
+        default: ${{ github.sha }}
+
+env:
+  PROJECT_ID: workiz-development
+  GKE_CLUSTER: staging
+  GKE_REGION: us-central1
+  GITHUB_SHA: ${{ github.sha }}
+  K8S_IMAGE: backend-php
+  ENV: ${{ inputs.release }}
+  K8S_NAMESPACE: rc
+  RELEASE_NAME: backend-php-${{ inputs.release }}
+  ASSETS_PATH_URL: "https://assets-staging.workiz.com/${{ inputs.release }}"
+  BACKEND_ASSETS_BUCKET_PATH: workiz-backend-assets/${{ inputs.release }}
+  FRONTEND_ASSETS_BUCKET_PATH: workiz-frontend-assets/${{ inputs.release }}
+  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+jobs:
+  build-frontend-bundle-experimental:
+    name: build experimental fe
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout frontend
+      uses: actions/checkout@v4
+      with:
+        repository: Workiz/frontend
+        ref: ${{ github.event.inputs.frontend_branch }}
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./
+    - name: Checkout shared actions
+      uses: actions/checkout@v4
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/workiz-actions
+    - uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v0
+    - name: install correct node version
+      uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: use env-rc.js for ci
+      run: mv env-rc.js env.js
+    - name: install npm modules with npm ci
+      run: npm ci
+    - name: unit test
+      run: npm run test 
+    - name: build bundle.js
+      if: success()
+      run: |
+        ASSETS_PATH="$ASSETS_PATH_URL/$GITHUB_SHA" npm run build-rc-experimental
+    - name: push to workiz-frontend-assets-rc bucket
+      uses: google-github-actions/upload-cloud-storage@v1
+      with:
+        path: '/var/tmp/experimental'
+        destination: '${{env.FRONTEND_ASSETS_BUCKET_PATH}}/${{github.sha}}/experimental'
+        parent: false
+        process_gcloudignore: false
+    - name: copy backend assets to root
+      run: gsutil -m cp gs://$FRONTEND_ASSETS_BUCKET_PATH/$GITHUB_SHA/experimental/* gs://$FRONTEND_ASSETS_BUCKET_PATH/latest/experimental/
+  build-and-push-backend-assets-to-bucket:
+    name: build and push assets to staging bucket
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.release }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v0
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: Build and push backend assets
+      run: |-
+        npm ci
+        ASSETS_PATH="$ASSETS_PATH_URL/$GITHUB_SHA/" npm run build
+        gsutil -m cp -z js,css,html,json,ico,eot,otf,ttf,gif,jpeg,jpg,png,tiff  -a public-read  -r _assets/*   gs://$BACKEND_ASSETS_BUCKET_PATH/$GITHUB_SHA/_assets
+        gsutil -m cp -a public-read -r gs://$BACKEND_ASSETS_BUCKET_PATH/$GITHUB_SHA/_assets/* gs://$BACKEND_ASSETS_BUCKET_PATH/latest/_assets
+  build-and-push-staging-k8s-docker-image:
+    name: build staging k8s docker image
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.release }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: "projects/355463638541/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider"
+        service_account: "github-actions-service-account@decoded-agency-207514.iam.gserviceaccount.com"
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v0
+    - uses: actions/setup-node@v3
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: login to gcr
+      run: |-
+        gcloud --quiet auth configure-docker
+    - name: Build docker
+      run: |-
+        npm ci
+        ASSETS_PATH="$ASSETS_PATH_URL/$GITHUB_SHA/" npm run build
+        docker build \
+          --tag "gcr.io/$PROJECT_ID/$K8S_IMAGE:$GITHUB_SHA" \
+          --tag "gcr.io/$PROJECT_ID/$K8S_IMAGE:latest" \
+          .
+        if [[ -n "${{ inputs.app_version }}" ]]; then
+          docker tag "gcr.io/$PROJECT_ID/$K8S_IMAGE:latest" "gcr.io/$PROJECT_ID/$K8S_IMAGE:${{ inputs.app_version }}"
+        fi
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: "projects/791610978826/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider"
+        service_account: "github-actions-service-account@workiz-development.iam.gserviceaccount.com"
+    - name: Publish Docker Image
+      run: |-
+        docker push --all-tags gcr.io/$PROJECT_ID/$K8S_IMAGE
+  
+  deploy-helm-staging-chart:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    needs: [build-and-push-staging-k8s-docker-image,build-and-push-backend-assets-to-bucket]
+    name: Deploy staging helm chart
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.release }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: "projects/791610978826/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider"
+        service_account: "github-actions-service-account@workiz-development.iam.gserviceaccount.com"
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v0
+    - name: Set up helm
+      uses: azure/setup-helm@v3
+      with:
+        version: ${{ secrets.AZURE_HELM_VERSION }} # default is latest stable
+      id: install
+    - uses: google-github-actions/get-gke-credentials@v1
+      with:
+        cluster_name: ${{ env.GKE_CLUSTER }}
+        location:  us-central1
+    - name: annotate secret
+      run: |-
+        kubectl annotate es ${{ inputs.release }}-backend force-sync=$(date +%s) --overwrite -n $K8S_NAMESPACE || echo -e "\e[1;34m [INFO] secret not exists"
+        sleep 10     
+    - name: Checkout shared actions
+      uses: actions/checkout@v4
+      with:
+        repository: Workiz/workiz-actions
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/workiz-actions 
+    - name: Deploy NEW Helm Chart
+      run: |-
+        cp .htaccess ./infra/helm/workiz-backend/backend-base 
+        helm dependency update ./infra/helm/${{ inputs.release }}
+        helm package --app-version ${{ inputs.app_version }} ./infra/helm/${{ inputs.release }}
+        echo "helm upgrade --install -n $K8S_NAMESPACE $RELEASE_NAME \
+        ./workiz-backend-0.1.0.tgz \
+        -f infra/helm/$K8S_NAMESPACE/values.$K8S_NAMESPACE.yaml \
+        -f infra/helm/${{ inputs.release }}/values.${{ inputs.release }}.yaml \
+        -f infra/helm/${{ inputs.release }}/values.crons.${{ inputs.release }}.yaml \
+        --atomic \
+        --timeout ${{ secrets.HELM_TIMEOUT }} \
+        --set image.tag=${{ inputs.app_version }} \
+        --set githubRef="${GITHUB_REF##*/}" \
+        --set githubSha="${GITHUB_SHA}" \
+        --set namespace=$K8S_NAMESPACE \
+        --debug"
+
+        helm upgrade --install -n $K8S_NAMESPACE $RELEASE_NAME \
+          ./workiz-backend-0.1.0.tgz \
+          -f infra/helm/$K8S_NAMESPACE/values.$K8S_NAMESPACE.yaml \
+          -f infra/helm/${{ inputs.release }}/values.${{ inputs.release }}.yaml \
+          -f infra/helm/${{ inputs.release }}/values.crons.${{ inputs.release }}.yaml \
+          --atomic \
+          --timeout ${{ secrets.HELM_TIMEOUT }} \
+          --set global.image.tag=${{ inputs.app_version }} \
+          --set global.githubRef="${GITHUB_REF##*/}" \
+          --set global.githubSha="${GITHUB_SHA}" \
+          --set namespace=$K8S_NAMESPACE \
+          --debug
+    - name: Send failure slack msg 
+      if: failure()  
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'infra-helm'
+        MESSAGE: 'Failed to deploy new chart on staging :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 

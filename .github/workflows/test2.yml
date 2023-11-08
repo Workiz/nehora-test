@@ -49,7 +49,7 @@ jobs:
   deploy-helm-rc-chart:
     needs: [create-rc-branches-and-tags]
     name: build and deploy rc
-    uses: Workiz/backend/.github/workflows/deploy-helm-rc.yaml@${{ needs.create-rc-branches-and-tags.outputs.branch }}
+    uses: ./.github/workflows/deploy-helm-rc.yaml
     secrets: inherit
     with: 
       frontend_branch: workiz.com 
