@@ -21,7 +21,7 @@ on:
         type: string
         description: App version
         required: false
-        default: ${{ github.sha }}
+        default: ''
   workflow_call:
     inputs:
       frontend_branch:
