@@ -1,25 +1,90 @@
-name: TEST2
+name: 🚅 train
+
 on:
   workflow_dispatch:
-    
-jobs:
+    inputs:
+      run-automation:
+        type: boolean
+        description: run-automation
+        default: true
+      new-rc:
+        type: boolean
+        description: Create RC from SCRATCH
+        default: false 
 
-  main-job:
-    name: main-job
+env:
+  ALTER_PROJECT_ID: ${{ secrets.GKE_PROJECT_ALTER }}
+  GKE_CLUSTER: wstgcluster
+  GKE_ZONE: us-central1-b   # TODO: update to cluster zone
+  K8S_IMAGE: backend-php
+  K8S_NAMESPACE: rc
+  RELEASE_NAME: backend-php-rc
+  ASSETS_RC_PATH_URL: "https://assets-rc.workiz.com"
+  BACKEND_ASSETS_RC_BUCKET_PATH: workiz-backend-assets-rc
+  FRONTEND_ASSETS_RC_BUCKET_PATH: workiz-frontend-assets-rc
+  BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
+  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
+  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
+  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
+  BRANCH: ${{ github.ref_name }}
+  BACKEND_PHP_HELM_VERSION: "0.1.0"
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  NPM_READONLY_TOKEN: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+
+jobs: 
+  create-rc-branches-and-tags:
+    name: create rc branches and tags
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.create-rc-branches-and-tags.outputs.branch }}
+      rc_tag: ${{ steps.create-rc-branches-and-tags.outputs.rc_tag }}
+    steps:
+    - name: make outputs
+      id: create-rc-branches-and-tags
+      run: |
+        echo ::set-output name=branch::DEVOPS-1329-backend-move-rc-to-staging-cluster
+        echo ::set-output name=rc_tag::tag123
+
+  deploy-helm-rc-chart:
+    name: build and deploy rc
+    uses: Workiz/backend/.github/workflows/deploy-helm-rc.yaml@${{ needs.create-rc-branches-and-tags.outputs.branch }}
+    secrets: inherit
+    with: 
+      frontend_branch: workiz.com 
+  send-slack-msg:
+    needs: [deploy-helm-rc-chart]
+    name: send slack msg
     runs-on: ubuntu-latest
     steps:
     - name: Checkout shared actions
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: Workiz/workiz-actions
-        ref: DEVOPS-1072-workiz-actions-check-lock-action
+        ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: Check lock
-      id: check-lock
-      uses: ./tmp/workiz-actions/block-deployment
+    - name: Send slack msg 
+      uses: ./tmp/workiz-actions/slack-msg
       with:
-        ENV: "staging"
-        SERVICE_NAME: "microservice-for-infra-tests"
-        ALTER_SA_GITHUB_ACTIONS_JSON_KEY: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-
+        CHANNEL: 'nehoramoshe'
+        MESSAGE: 'RC got updated and automated tests are running :charmander_dancing: \n'
+        SUCCESS: true
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
+    - name: infra-api  
+      run: | 
+        echo "curl success to axiom"
+    - name: failed-slack-msg
+      if: ${{ needs.deploy-helm-rc-chart.result == 'failure' }}
+      uses: ./tmp/workiz-actions/slack-msg
+      with:
+        CHANNEL: 'nehoramoshe'
+        MESSAGE: 'RC failed to update,helm upgrade failed. :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
+    - name: infra-api failed
+      if: ${{ needs.deploy-helm-rc-chart.result == 'failure' }}
+      run: | 
+        echo "curl to axiom"
