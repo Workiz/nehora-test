@@ -45,9 +45,7 @@ jobs:
         run: |
           RELEASES_JSON=$(helm list --namespace staging -o json | jq -c '[.[].name]')
           ESCAPED_RELEASES_JSON=$(echo "$RELEASES_JSON" | sed 's/"/\\"/g')
-          echo "matrix={\"test-group\":[\"groupA\",\"groupB\"]}" >> $GITHUB_OUTPUT
-          echo "matrix={\"test-group\":[\"groupA\",\"groupB\"]}" 
-          # echo "matrix={\"services\":$ESCAPED_RELEASES_JSON}" >> $GITHUB_OUTPUT
+          echo "matrix={\"services\":$ESCAPED_RELEASES_JSON}" >> $GITHUB_OUTPUT
           echo "matrix={\"services\":$ESCAPED_RELEASES_JSON}"
   deploy-service:
     needs: create-staging-env
