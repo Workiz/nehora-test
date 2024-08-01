@@ -5,6 +5,8 @@ on:
 
 env:
   PROJECT_ID: workiz-development
+  GKE_CLUSTER: staging
+  GKE_ZONE: us-central1-b
 
 
 jobs:
@@ -21,6 +23,10 @@ jobs:
           service_account: github-actions-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
+      - uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
       - id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
