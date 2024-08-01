@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 env:
-  ALTER_PROJECT_ID: ${{ secrets.GKE_PROJECT_ALTER }}
+  PROJECT_ID: workiz-development
 
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: projects/791610978826/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider
-          service_account: github-actions-service-account@workiz-development.iam.gserviceaccount.com
+          service_account: github-actions-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
       - name: 'Set up Cloud SDK'
         uses: 'google-github-actions/setup-gcloud@v2'
       - id: 'secrets'
