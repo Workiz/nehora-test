@@ -66,12 +66,17 @@ jobs:
           SECRET_PROJECT_ID="workiz-development"
           TIMEOUT="300s"
           echo "Image: $IMAGE"
-          # helm upgrade $RELEASE $CHART_REPO --namespace $ --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
-          # --set secretProjectId=workiz-development \
-          # --set gcpProjectId=workiz-development \
-          # --set secretProjectId=workiz-development \
-          # --set image.registry="gcr.io/workiz-development" \
-          # --set image.tag=$IMAGE \
-          # --set customNodeEnv=staging  
+          if [ ${{ matrix.services }} == "microservice-for-infra-tests" ]; then
+            echo "Deploying ${{ matrix.services }}"
+            helm upgrade ${{ matrix.services }} $CHART_REPO --namespace $ --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
+            --set secretProjectId=workiz-development \
+            --set gcpProjectId=workiz-development \
+            --set secretProjectId=workiz-development \
+            --set image.registry="gcr.io/workiz-development" \
+            --set image.tag=$IMAGE \
+            --set customNodeEnv=staging 
+          else
+            echo "Deploying ${{ matrix.services }}"
+          fi 
       
     
