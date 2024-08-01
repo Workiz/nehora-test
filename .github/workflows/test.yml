@@ -87,7 +87,7 @@ jobs:
           IMAGE=$(helm get values ${{ matrix.services }} --namespace staging | grep 'tag:' | awk '{print $2}')
           STAGING_NAMESPACE="staging"
           TARGET_NAMESPACE="nehora"
-          CHART_REPO="workiz-helm-repo/workiz-chart"
+          CHART_REPO="workiz-helm-repo-dev/workiz-chart"
           SECRET_PROJECT_ID="workiz-development"
           TIMEOUT="300s"
           echo "Image: $IMAGE"
