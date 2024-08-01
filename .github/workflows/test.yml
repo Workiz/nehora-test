@@ -56,6 +56,28 @@ jobs:
       fail-fast: false
       max-parallel: 40
     steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/791610978826/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider
+          service_account: github-actions-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+      - uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v2'
+        with:
+          secrets: |-
+            GH_READONLY_TOKEN:${{ env.PROJECT_ID }}/GH_READONLY_TOKEN
+            AZURE_HELM_VERSION:${{ env.PROJECT_ID }}/AZURE_HELM_VERSION
+            WORKIZ_INFRA_AUTH:${{ env.PROJECT_ID }}/WORKIZ_INFRA_AUTH
+            MARKIZBOT_COMMENT_TOKEN:${{ env.PROJECT_ID }}/MARKIZBOT_COMMENT_TOKEN
+      - uses: azure/setup-helm@v4.1.0
+        with:
+          version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
       - name: 'Deploy service'
         run: |
           echo "Deploying service ${{ matrix.services }}"
@@ -66,17 +88,13 @@ jobs:
           SECRET_PROJECT_ID="workiz-development"
           TIMEOUT="300s"
           echo "Image: $IMAGE"
-          if [ ${{ matrix.services }} == "microservice-for-infra-tests" ]; then
-            echo "Deploying ${{ matrix.services }}"
-            helm upgrade ${{ matrix.services }} $CHART_REPO --namespace $ --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
-            --set secretProjectId=workiz-development \
-            --set gcpProjectId=workiz-development \
-            --set secretProjectId=workiz-development \
-            --set image.registry="gcr.io/workiz-development" \
-            --set image.tag=$IMAGE \
-            --set customNodeEnv=staging 
-          else
-            echo "Deploying ${{ matrix.services }}"
-          fi 
+          echo "Deploying ${{ matrix.services }}"
+          helm upgrade ${{ matrix.services }} $CHART_REPO --namespace $ --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
+          --set secretProjectId=workiz-development \
+          --set gcpProjectId=workiz-development \
+          --set secretProjectId=workiz-development \
+          --set image.registry="gcr.io/workiz-development" \
+          --set image.tag=$IMAGE \
+          --set customNodeEnv=staging 
       
     
