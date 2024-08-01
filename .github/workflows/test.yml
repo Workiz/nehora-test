@@ -96,7 +96,7 @@ jobs:
           TIMEOUT="300s"
           echo "Image: $IMAGE"
           echo "Deploying ${{ matrix.services }}"
-          helm upgrade ${{ matrix.services }} $CHART_REPO --namespace $ --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
+          helm upgrade ${{ matrix.services }} $CHART_REPO --namespace $TARGET_NAMESPACE --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
           --set secretProjectId=workiz-development \
           --set gcpProjectId=workiz-development \
           --set secretProjectId=workiz-development \
