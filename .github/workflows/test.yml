@@ -96,7 +96,7 @@ jobs:
           TIMEOUT="300s"
           echo "Image: $IMAGE"
           echo "Deploying ${{ matrix.services }}"
-          helm get values $RELEASE --namespace staging -o yaml > existing-values.yaml
+          helm get values ${{ matrix.services }} --namespace staging -o yaml > existing-values.yaml
           sed -i 's/environment: staging/environment: nehora/g' existing-values.yaml
 
           helm upgrade ${{ matrix.services }} $CHART_REPO --namespace $TARGET_NAMESPACE --set secretProjectId=$SECRET_PROJECT_ID --values existing-values.yaml --atomic --timeout $TIMEOUT --devel --install --debug \
