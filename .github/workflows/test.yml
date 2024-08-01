@@ -51,6 +51,9 @@ jobs:
   deploy-service:
     needs: create-staging-env
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     strategy:
       matrix: ${{fromJson(needs.create-staging-env.outputs.matrix)}}
       fail-fast: false
