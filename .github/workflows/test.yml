@@ -2,75 +2,63 @@ name: ☁️ TEST
 
 on:
   workflow_dispatch:
-    inputs:
-      run-automation:
-        type: boolean
-        description: run-automation
-        default: true
-      new-rc:
-        type: boolean
-        description: new rc
-        default: false 
 
 env:
   ALTER_PROJECT_ID: ${{ secrets.GKE_PROJECT_ALTER }}
-  GKE_CLUSTER: wstgcluster
-  GKE_ZONE: us-central1-b   # TODO: update to cluster zone
-  K8S_IMAGE: backend-php
-  ENV: rc
-  K8S_NAMESPACE: rc
-  RELEASE_NAME: backend-php-rc
-  ASSETS_RC_PATH_URL: "https://assets-rc.workiz.com"
-  BACKEND_ASSETS_RC_BUCKET_PATH: workiz-backend-assets-rc
-  nehora_ASSETS_RC_BUCKET_PATH: workiz-nehora-assets-rc
-  BUCKET_PATH:  static-cdn.workiz.com/fe/rc/latest
-  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
-  MIG:  preprod-ig
-  MYSQL_HOST: ${{ secrets.MYSQL_RC_HOST }}
-  MYSQL_USER: ${{ secrets.MYSQL_STAGING_USER }}
-  MYSQL_PW: ${{ secrets.MYSQL_STAGING_PW}}
-  BRANCH: ${{ github.ref_name }}
-  BACKEND_PHP_HELM_VERSION: "0.1.0"
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
 
 
 jobs:
-  create-rc-branches-and-tags:
-    outputs:
-      branch: ${{ steps.branch.outputs.branch }}
-      rc_tag: ${{ steps.branch.outputs.rc_tag }}
-    name: create nehora and backend branches and tags
+  create-staging-env:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/workiz-actions
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/workiz-actions
-    - name: Checkout nehora
-      uses: actions/checkout@v3
-      with:
-        repository: Workiz/nehora
-        ref: ${{ github.ref_name }}
-        token: ${{ secrets.GH_TOKEN_REPOS }}
-        path: ./tmp/nehora
-    - name: create branches and tags 
-      uses: ./tmp/workiz-actions/create-tags-and-branches
-      with: 
-        CREATE_RC_TAGS: true
-        NEW_RC: ${{ inputs.new-rc }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_REPOS }}
-        ANOTHER_REPO: nehora
-    - name: set branch output
-      id: branch
-      run: |
-        echo "branch=${{ env.BRANCH }}" >> $GITHUB_OUTPUT
-        echo "rc_tag=${{ env.RC_TAG }}" >> $GITHUB_OUTPUT
-        echo "branch=${{ env.BRANCH }}"
-        echo "rc_tag=${{ env.RC_TAG }}"
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider
+          service_account: github-actions-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v2'
+        with:
+          secrets: |-
+            GH_READONLY_TOKEN:${{ env.PROJECT_ID }}/GH_READONLY_TOKEN
+            AZURE_HELM_VERSION:${{ env.PROJECT_ID }}/AZURE_HELM_VERSION
+            WORKIZ_INFRA_AUTH:${{ env.PROJECT_ID }}/WORKIZ_INFRA_AUTH
+            MARKIZBOT_COMMENT_TOKEN:${{ env.PROJECT_ID }}/MARKIZBOT_COMMENT_TOKEN
+      - uses: azure/setup-helm@v4.1.0
+        with:
+          version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
+      - name: 'create matrix for all services'
+        id: matrix
+        run: |
+          RELEASES_JSON=$(helm list --namespace $STAGING_NAMESPACE -o json | jq -c '[.[].name]')
+          # Output the matrix in the desired format.
+          echo "matrix={\"services\":$RELEASES_JSON}" >> $GITHUB_OUTPUT
+  deploy-service:
+    needs: create-staging-env
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{fromJson(needs.create-staging-env.outputs.matrix)}}
+      fail-fast: false
+      max-parallel: 40
+    steps:
+      - name: 'Deploy service'
+        run: |
+          echo "Deploying service ${{ matrix.services }}"
+          IMAGE=$(helm get values ${{ matrix.services }} --namespace staging | grep 'tag:' | awk '{print $2}')
+          STAGING_NAMESPACE="staging"
+          TARGET_NAMESPACE="nehora"
+          CHART_REPO="workiz-helm-repo/workiz-chart"
+          SECRET_PROJECT_ID="workiz-development"
+          TIMEOUT="300s"
+          echo "Image: $IMAGE"
+          # helm upgrade $RELEASE $CHART_REPO --namespace $ --set secretProjectId=$SECRET_PROJECT_ID --reuse-values --atomic --timeout $TIMEOUT --devel --install --debug \
+          # --set secretProjectId=workiz-development \
+          # --set gcpProjectId=workiz-development \
+          # --set secretProjectId=workiz-development \
+          # --set image.registry="gcr.io/workiz-development" \
+          # --set image.tag=$IMAGE \
+          # --set customNodeEnv=staging  
+      
+    
