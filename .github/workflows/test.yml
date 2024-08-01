@@ -35,7 +35,7 @@ jobs:
       - name: 'create matrix for all services'
         id: matrix
         run: |
-          RELEASES_JSON=$(helm list --namespace $STAGING_NAMESPACE -o json | jq -c '[.[].name]')
+          RELEASES_JSON=$(helm list --namespace staging -o json | jq -c '[.[].name]')
           # Output the matrix in the desired format.
           echo "matrix={\"services\":$RELEASES_JSON}" >> $GITHUB_OUTPUT
           echo "matrix={\"services\":$RELEASES_JSON}"
