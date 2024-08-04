@@ -57,10 +57,10 @@ jobs:
           kubectl get secret gcpsm-secret -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
           kubectl get secret google-local-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
           kubectl get es api-secret-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
-          kubectl get secret staging-backend-php-service-accounts-auth-p12 -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
-          kubectl get secret staging-backend-php-service-accounts-google-creds -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
-          kubectl get secret staging-unit-public-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
-          kubectl get secret staging-unit-private-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
+          kubectl get es staging-backend-php-service-accounts-auth-p12 -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
+          kubectl get es staging-backend-php-service-accounts-google-creds -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
+          kubectl get es staging-unit-public-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
+          kubectl get es staging-unit-private-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
   deploy-service:
     needs: create-staging-env
     runs-on: ubuntu-latest
