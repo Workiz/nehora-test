@@ -121,6 +121,12 @@ jobs:
       contents: 'read'
       id-token: 'write'
     steps:
+      - name: Checkout backend
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/backend
+          ref: DEVOPS-1713-backend-make-backend-work-on-workiz-dev
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
@@ -143,12 +149,6 @@ jobs:
       - uses: azure/setup-helm@v4.1.0
         with:
           version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
-      - name: Checkout backend
-        uses: actions/checkout@v3
-        with:
-          repository: Workiz/backend
-          ref: DEVOPS-1713-backend-make-backend-work-on-workiz-dev
-          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
       - name: 'Deploy backend-php'
         run: |
           # get githubSha from backend-php-staging deployment
