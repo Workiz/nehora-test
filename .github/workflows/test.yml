@@ -173,6 +173,7 @@ jobs:
               --set staging-dev.namespace=$K8S_NAMESPACE \
               --set base.namespace=$K8S_NAMESPACE \
               --set staging.namespace=$K8S_NAMESPACE \
+              --set staging.serverName=staging-dev \
               --debug
       
           
