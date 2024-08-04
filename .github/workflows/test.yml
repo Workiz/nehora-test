@@ -44,11 +44,19 @@ jobs:
       - name: 'create matrix for all services'
         id: matrix
         run: |
-          EXCLUDE=("account" "ai-services-exp" "backend-php-pt" "elasticsearch-listener" "mongodb-listener" "socket-io" "ts-service" "infra-api" "infra-api-staging" "qb-desktop")
+          EXCLUDE=("account" "ai-services-exp" "backend-php-pt" "elasticsearch-listener" "mongodb-listener" "socket-io" "ts-service" "infra-api" "infra-api-staging" "qb-desktop" "ai-services" "integrations-exp" "microservice-for-infra-tests" "backend-php-staging")
           EXCLUDE_JSON=$(printf '%s\n' "${EXCLUDE[@]}" | jq -R . | jq -s .)
           RELEASES_JSON=$(helm list --namespace staging -o json | jq -c --argjson exclude "$EXCLUDE_JSON" '[.[] | select(.name as $name | $exclude | index($name) | not) | .name]')
           echo "matrix={\"services\":$RELEASES_JSON}"
           echo "matrix={\"services\":$RELEASES_JSON}" >> $GITHUB_OUTPUT
+      - name: 'create namespace'
+        run: |
+          kubectl create namespace nehora
+      - name: 'create secrets'
+        run: |
+          kubectl get secret gcpsm-secret -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
+          kubectl get secret google-local-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
+          kubectl get es api-secret-key -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
   deploy-service:
     needs: create-staging-env
     runs-on: ubuntu-latest
@@ -106,5 +114,61 @@ jobs:
           --set image.registry="gcr.io/workiz-development" \
           --set image.tag=$IMAGE \
           --set customNodeEnv=staging 
+  deploy-backend-php:
+    needs: create-staging-env
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/791610978826/locations/global/workloadIdentityPools/gh-pool/providers/gh-provider
+          service_account: github-actions-service-account@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v2'
+      - uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: ${{ env.GKE_CLUSTER }}
+          location: ${{ env.GKE_ZONE }}
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v2'
+        with:
+          secrets: |-
+            GH_READONLY_TOKEN:${{ env.PROJECT_ID }}/GH_READONLY_TOKEN
+            AZURE_HELM_VERSION:${{ env.PROJECT_ID }}/AZURE_HELM_VERSION
+            WORKIZ_INFRA_AUTH:${{ env.PROJECT_ID }}/WORKIZ_INFRA_AUTH
+            MARKIZBOT_COMMENT_TOKEN:${{ env.PROJECT_ID }}/MARKIZBOT_COMMENT_TOKEN
+      - uses: azure/setup-helm@v4.1.0
+        with:
+          version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
+      - name: Checkout backend
+        uses: actions/checkout@v3
+        with:
+          repository: Workiz/backend
+          ref: DEVOPS-1713-backend-make-backend-work-on-workiz-dev
+          token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
+      - name: 'Deploy backend-php'
+        run: |
+          # get githubSha from backend-php-staging deployment
+          APP_VERSION=$(helm get values backend-php-staging --namespace staging | grep 'tag:' | awk '{print $2}')
+          $K8S_NAMESPACE="nehora"
+          cp .htaccess ./infra/helm/workiz-backend/backend-base 
+          helm dependency update ./infra/helm/staging
+          helm upgrade --install -n $K8S_NAMESPACE backend-php-staging \
+            infra/helm/staging \
+            -f infra/helm/staging/values.staging.yaml \
+            -f infra/helm/staging-dev/values.crons.staging-dev.yaml \
+            -f infra/helm/staging-dev/values.staging-dev.yaml \
+            --atomic \
+            --timeout ${{ secrets.HELM_TIMEOUT }} \
+            --set global.image.tag=$APP_VERSION \
+            --set global.githubRef="${GITHUB_REF##*/}" \
+            --set global.githubSha="${APP_VERSION}" \
+            --debug
+      
+          
+
       
     
