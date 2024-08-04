@@ -51,7 +51,7 @@ jobs:
           echo "matrix={\"services\":$RELEASES_JSON}" >> $GITHUB_OUTPUT
       - name: 'create namespace'
         run: |
-          kubectl create namespace nehora
+          kubectl create namespace nehora || echo "namespace already exists"
       - name: 'create secrets'
         run: |
           kubectl get secret gcpsm-secret -n staging -o yaml | sed 's/staging/nehora/g' | kubectl apply -n nehora -f - || echo "secret not found"
