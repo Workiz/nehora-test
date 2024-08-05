@@ -162,7 +162,7 @@ jobs:
               --atomic \
               --timeout 300s \
               --set global.image.tag=$APP_VERSION \
-              --set global.githubRef="bgfdmkl" \
+              --set global.githubRef="${GITHUB_REF##*/}" \
               --set global.githubSha="latest" \
               --set namespace=$K8S_NAMESPACE   \
               --set $K8S_NAMESPACE.namespace=$K8S_NAMESPACE \
