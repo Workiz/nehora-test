@@ -161,7 +161,7 @@ jobs:
           cp .htaccess ./infra/helm/workiz-backend/backend-base 
           helm dependency update ./infra/helm/staging-dev
           # replace all staging-dev to ${{ env.NAMESPACE }} in file infra/helm/staging-dev/values.staging-dev.yaml
-          sed -i `s/staging-dev/${{ env.NAMESPACE }}/g` infra/helm/staging-dev/values.staging-dev.yaml
+          sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/values.staging-dev.yaml
           cat infra/helm/staging-dev/values.staging-dev.yaml
           helm upgrade --install -n $K8S_NAMESPACE backend-php-$K8S_NAMESPACE \
               ./infra/helm/staging-dev \
