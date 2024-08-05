@@ -165,7 +165,7 @@ jobs:
               -f infra/helm/staging-dev/values.staging-dev.yaml \
               -f infra/helm/staging-dev/values.crons.staging-dev.yaml \
               --atomic \
-              --timeout 60s \
+              --timeout 300s \
               --set global.image.tag=$APP_VERSION \
               --set global.githubRef="bgfdmkl" \
               --set global.githubSha="${APP_VERSION}" \
