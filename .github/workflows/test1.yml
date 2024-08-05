@@ -3,59 +3,74 @@ on:
   workflow_dispatch:
     
 
+env: 
+  GKE_PROJECT: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: wstgcluster
+  GKE_ZONE: us-central1-b
+  GITHUB_SHA: ${{ github.sha }}
+  ALTER_IMAGE: backend-php
+  AMPLITUDE_API_KEY: ${{ secrets.AMPLITUDE_API_KEY }}
+  AMPLITUDE_SECRET_KEY: ${{ secrets.AMPLITUDE_SECRET_KEY }}
+  BUCKET_PATH:  static-cdn.workiz.com/fe
+  ASSETS_PATH_URL: "https://assets.workiz.com"
+  ASSETS_BUCKET_PATH: assets.workiz.com
+  K8S_NAMESPACE: prod
+  RELEASE_NAME: backend-php-app-new
+  BACKEND_PHP_HELM_VERSION: "0.1.0"
+  NPM_READONLY_TOKEN: ${{secrets.NPM_READONLY_TOKEN}}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  FRONTEND_ASSETS_BUCKET_PATH: workiz-fe-assets-dev/staging-dev
+  ASSETS_PATH_URL_STAGING: "https://assets-dev-be.workiz.com/staging-dev"
+
 jobs:
 
-  Percy-tests:
-    name: percy-tests
+  build-fe-staging-dev:
+    name: build bundle.js for staging-dev
     runs-on: ubuntu-latest
-    steps: 
-    - name: Checkout e2e tests
-      uses: actions/checkout@v3
+    steps:
+    - uses: actions/checkout@v4
       with:
-        repository: Workiz/percy-visual-automation
-        ref: workiz.com
+        repository: Workiz/frontend
+        ref: ${{ github.ref_name }}
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
+        path: ./
+    - name: Check out workiz-actions
+      uses: actions/checkout@v4
       with:
         repository: Workiz/workiz-actions
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: percy-tests
-      id: percy-tests
-      uses: ./tmp/workiz-actions/percy-tests
+        fetch-depth: '0'
+    - uses: google-github-actions/auth@v2
       with:
-        TAG: "tag"
-        BRANCH: "branch"
-        GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
-  E2E-api-tests:
-    name: E2E api tests
-    runs-on: ubuntu-latest
-    steps: 
-    - name: Checkout e2e tests
-      uses: actions/checkout@v3
+        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
+    - name: 'Set up Cloud SDK'
+      uses: google-github-actions/setup-gcloud@v2
+    - name: install correct node version
+      uses: actions/setup-node@v4
       with:
-        repository: Workiz/E2E-api-tests
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-    - name: Checkout shared actions
-      uses: actions/checkout@v3
+        node-version-file: '.nvmrc'
+        cache: 'npm'
+    - name: install npm modules with npm ci
+      run: npm ci
+    - name: use env.js for ci
+      run: mv env-rc.js env.js
+    - name: build asset
+      if: success()
+      run: |
+        ASSETS_PATH="$ASSETS_PATH_URL_STAGING/latest" BUILD_NO_CERT=true npm run build_staging
+    - name: copy bundle to latest
+      run: |
+          gsutil -o "GSUtil:parallel_thread_count=100" -o "GSUtil:parallel_process_count=2" -o "GSUtil:num_retries=12" -o "GSUtil:max_retry_delay=20" -m rsync -a public-read -d -r /var/tmp/_assets/js gs://$FRONTEND_ASSETS_BUCKET_PATH/$GITHUB_SHA
+          gsutil -o "GSUtil:parallel_thread_count=100" -o "GSUtil:parallel_process_count=2" -o "GSUtil:num_retries=12" -o "GSUtil:max_retry_delay=20" -m rsync -a public-read -d -r gs://$FRONTEND_ASSETS_BUCKET_PATH/$GITHUB_SHA gs://$FRONTEND_ASSETS_BUCKET_PATH/latest
+    - name: Send failure slack msg 
+      if: failure()  
+      uses: ./tmp/workiz-actions/slack-msg
       with:
-        repository: Workiz/workiz-actions
-        ref: workiz.com
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./tmp/workiz-actions
-    - name: e2e-tests
-      id: e2e-tests
-      uses: ./tmp/workiz-actions/e2e-tests
-      with:
-        TAG: "tag"
-        BRANCH: "branch"
-        GKE_SA_HELM_DEPLOYER_KEY: ${{ secrets.GKE_SA_HELM_DEPLOYER_KEY }}
-  run-cypress-tests:
-    name: run cypress tests
-    uses: Workiz/workiz-cypress-automation/.github/workflows/run-cypress-parallel.yml@workiz.com
-    secrets: inherit
-    with: 
-      tag: "tag1"
+        CHANNEL: 'infra-alerts'
+        MESSAGE: 'Failed to build or deploy staging-dev frontend :sob:'
+        SUCCESS: false
+        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
+        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
+
