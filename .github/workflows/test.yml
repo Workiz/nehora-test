@@ -8,7 +8,7 @@ env:
   GKE_CLUSTER: staging
   GKE_ZONE: us-central1	
   REPO_NAME: workiz-helm-repo-dev
-  NAMESPACE: nehora
+  NAMESPACE: matan
 
 
 jobs:
