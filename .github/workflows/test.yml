@@ -160,7 +160,6 @@ jobs:
           K8S_NAMESPACE="${{ env.NAMESPACE }}"
           cp .htaccess ./infra/helm/workiz-backend/backend-base 
           helm dependency update ./infra/helm/staging-dev
-          # replace all staging-dev to ${{ env.NAMESPACE }} in file infra/helm/staging-dev/values.staging-dev.yaml
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/values.staging-dev.yaml
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/Chart.yaml
           cat infra/helm/staging-dev/values.staging-dev.yaml
@@ -175,7 +174,7 @@ jobs:
               --set global.githubRef="bgfdmkl" \
               --set global.githubSha="${APP_VERSION}" \
               --set namespace=$K8S_NAMESPACE   \
-              --set staging-dev.namespace=$K8S_NAMESPACE \
+              --set $K8S_NAMESPACE.namespace=$K8S_NAMESPACE \
               --set base.namespace=$K8S_NAMESPACE \
               --set staging.namespace=$K8S_NAMESPACE \
               --debug
