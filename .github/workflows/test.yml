@@ -8,7 +8,7 @@ env:
   GKE_CLUSTER: staging
   GKE_ZONE: us-central1	
   REPO_NAME: workiz-helm-repo-dev
-  NAMESPACE: matan
+  NAMESPACE: ${{ github.actor }}
 
 
 jobs:
@@ -163,7 +163,7 @@ jobs:
               --timeout 300s \
               --set global.image.tag=$APP_VERSION \
               --set global.githubRef="bgfdmkl" \
-              --set global.githubSha="${APP_VERSION}" \
+              --set global.githubSha="latest" \
               --set namespace=$K8S_NAMESPACE   \
               --set $K8S_NAMESPACE.namespace=$K8S_NAMESPACE \
               --set base.namespace=$K8S_NAMESPACE \
