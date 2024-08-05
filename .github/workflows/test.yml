@@ -147,7 +147,7 @@ jobs:
           version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
       - name: 'Deploy backend-php'
         run: |
-          APP_VERSION=$(helm get values backend-php-staging --namespace staging | grep 'tag:' | awk '{print $2}')
+          APP_VERSION=$(helm get values backend-php-staging-dev --namespace staging | grep 'tag:' | awk '{print $2}')
           K8S_NAMESPACE="${{ env.NAMESPACE }}"
           cp .htaccess ./infra/helm/workiz-backend/backend-base 
           helm dependency update ./infra/helm/staging-dev
