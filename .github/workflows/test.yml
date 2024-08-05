@@ -153,7 +153,6 @@ jobs:
           helm dependency update ./infra/helm/staging-dev
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/values.staging-dev.yaml
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/Chart.yaml
-          cat infra/helm/staging-dev/values.staging-dev.yaml
           helm upgrade --install -n $K8S_NAMESPACE backend-php-$K8S_NAMESPACE \
               ./infra/helm/staging-dev \
               -f infra/helm/staging/values.staging.yaml \
