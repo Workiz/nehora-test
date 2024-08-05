@@ -35,10 +35,7 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
           secrets: |-
-            GH_READONLY_TOKEN:${{ env.PROJECT_ID }}/GH_READONLY_TOKEN
             AZURE_HELM_VERSION:${{ env.PROJECT_ID }}/AZURE_HELM_VERSION
-            WORKIZ_INFRA_AUTH:${{ env.PROJECT_ID }}/WORKIZ_INFRA_AUTH
-            MARKIZBOT_COMMENT_TOKEN:${{ env.PROJECT_ID }}/MARKIZBOT_COMMENT_TOKEN
       - uses: azure/setup-helm@v4.1.0
         with:
           version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
@@ -88,10 +85,7 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
           secrets: |-
-            GH_READONLY_TOKEN:${{ env.PROJECT_ID }}/GH_READONLY_TOKEN
             AZURE_HELM_VERSION:${{ env.PROJECT_ID }}/AZURE_HELM_VERSION
-            WORKIZ_INFRA_AUTH:${{ env.PROJECT_ID }}/WORKIZ_INFRA_AUTH
-            MARKIZBOT_COMMENT_TOKEN:${{ env.PROJECT_ID }}/MARKIZBOT_COMMENT_TOKEN
       - uses: azure/setup-helm@v4.1.0
         with:
           version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
@@ -147,10 +141,7 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
           secrets: |-
-            GH_READONLY_TOKEN:${{ env.PROJECT_ID }}/GH_READONLY_TOKEN
             AZURE_HELM_VERSION:${{ env.PROJECT_ID }}/AZURE_HELM_VERSION
-            WORKIZ_INFRA_AUTH:${{ env.PROJECT_ID }}/WORKIZ_INFRA_AUTH
-            MARKIZBOT_COMMENT_TOKEN:${{ env.PROJECT_ID }}/MARKIZBOT_COMMENT_TOKEN
       - uses: azure/setup-helm@v4.1.0
         with:
           version: ${{ steps.secrets.outputs.AZURE_HELM_VERSION}} 
