@@ -153,20 +153,20 @@ jobs:
           helm dependency update ./infra/helm/staging-dev
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/values.staging-dev.yaml
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/Chart.yaml
-          helm upgrade --install -n $K8S_NAMESPACE backend-php-$K8S_NAMESPACE ./infra/helm/staging-dev \
-              -f infra/helm/staging/values.staging.yaml \
-              -f infra/helm/staging-dev/values.staging-dev.yaml \
-              -f infra/helm/staging-dev/values.crons.staging-dev.yaml \
-              --atomic \
-              --timeout 300s \
-              --set global.image.tag=$APP_VERSION \
-              --set global.githubRef="${GITHUB_REF##*/}" \
-              --set global.githubSha="latest" \
-              --set namespace=$K8S_NAMESPACE   \
-              --set $K8S_NAMESPACE.namespace=$K8S_NAMESPACE \
-              --set base.namespace=$K8S_NAMESPACE \
-              --set staging.namespace=$K8S_NAMESPACE \
-              --debug
+          helm upgrade --install -n ${{ env.NAMESPACE }} backend-php-${{ env.NAMESPACE }} ./infra/helm/staging-dev \
+            -f infra/helm/staging/values.staging.yaml \
+            -f infra/helm/staging-dev/values.staging-dev.yaml \
+            -f infra/helm/staging-dev/values.crons.staging-dev.yaml \
+            --atomic \
+            --timeout 300s \
+            --set global.image.tag=$APP_VERSION \
+            --set global.githubRef="${GITHUB_REF##*/}" \
+            --set global.githubSha="latest" \
+            --set namespace=${{ env.NAMESPACE }}   \
+            --set ${{ env.NAMESPACE }}.namespace=${{ env.NAMESPACE }} \
+            --set base.namespace=${{ env.NAMESPACE }} \
+            --set staging.namespace=${{ env.NAMESPACE }} \
+            --debug
       
           
 
