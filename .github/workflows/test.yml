@@ -168,6 +168,7 @@ jobs:
               --set $K8S_NAMESPACE.namespace=$K8S_NAMESPACE \
               --set base.namespace=$K8S_NAMESPACE \
               --set staging.namespace=$K8S_NAMESPACE \
+              --set global.overrideBundlePath="https://assets-dev-fe.workiz.com/staging-dev" \
               --debug
       
           
