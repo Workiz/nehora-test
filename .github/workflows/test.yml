@@ -148,6 +148,7 @@ jobs:
       - name: 'Deploy backend-php'
         run: |
           APP_VERSION=$(helm get values backend-php-staging-dev --namespace staging | grep 'tag:' | awk '{print $2}')
+          echo "APP_VERSION $APP_VERSION"
           K8S_NAMESPACE="${{ env.NAMESPACE }}"
           cp .htaccess ./infra/helm/workiz-backend/backend-base 
           helm dependency update ./infra/helm/staging-dev
