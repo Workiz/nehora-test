@@ -146,6 +146,7 @@ jobs:
           APP_VERSION=$(helm get values backend-php-staging-dev --namespace staging | grep 'tag:' | awk 'NR==2 {print $2}')
           echo "APP_VERSION $APP_VERSION"
           K8S_NAMESPACE="${{ env.NAMESPACE }}"
+          MARKIZ_BOT_TOKEN="${{ secrets.GH_TOKEN_MARKIZ_BOT }}"
           cp .htaccess ./infra/helm/workiz-backend/backend-base 
           helm dependency update ./infra/helm/staging-dev
           sed -i 's/staging-dev/${{ env.NAMESPACE }}/g' infra/helm/staging-dev/values.staging-dev.yaml
@@ -166,6 +167,7 @@ jobs:
               --set staging.namespace=$K8S_NAMESPACE \
               --set global.apacheEnvOverride.overrideBundlePath="https://assets-dev-fe.workiz.com/staging-dev" \
               --set $K8S_NAMESPACE.isCloudEnv=true \
+              --set $K8S_NAMESPACE.markizBotToken=${MARKIZ_BOT_TOKEN} \
               --debug
       
           
