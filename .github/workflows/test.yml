@@ -42,7 +42,7 @@ jobs:
       - name: 'create matrix for all services'
         id: matrix
         run: |
-          EXCLUDE=("account" "ai-services-exp" "backend-php-pt" "elasticsearch-listener" "mongodb-listener" "socket-io" "ts-service" "infra-api" "infra-api-staging" "qb-desktop" "ai-services" "integrations-exp" "microservice-for-infra-tests" "backend-php-staging")
+          EXCLUDE=("account" "ai-services-exp" "backend-php-pt" "backend-php-staging-dev" "elasticsearch-listener" "mongodb-listener" "socket-io" "ts-service" "infra-api" "infra-api-staging" "qb-desktop" "ai-services" "integrations-exp" "microservice-for-infra-tests" "backend-php-staging")
           EXCLUDE_JSON=$(printf '%s\n' "${EXCLUDE[@]}" | jq -R . | jq -s .)
           RELEASES_JSON=$(helm list --namespace staging -o json | jq -c --argjson exclude "$EXCLUDE_JSON" '[.[] | select(.name as $name | $exclude | index($name) | not) | .name]')
           echo "matrix={\"services\":$RELEASES_JSON}"
