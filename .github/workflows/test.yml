@@ -55,10 +55,6 @@ jobs:
           kubectl get secret gcpsm-secret -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
           kubectl get secret google-local-key -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
           kubectl get es api-secret-key -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
-          # kubectl get es staging-backend-php-service-accounts-auth-p12 -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
-          # kubectl get es staging-backend-php-service-accounts-google-creds -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
-          # kubectl get es staging-unit-public-key -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
-          # kubectl get es staging-unit-private-key -n staging -o yaml | sed 's/staging/${{ env.NAMESPACE }}/g' | kubectl apply -n ${{ env.NAMESPACE }} -f - || echo "secret not found"
   deploy-service:
     needs: create-staging-env
     runs-on: ubuntu-latest
@@ -169,6 +165,7 @@ jobs:
               --set base.namespace=$K8S_NAMESPACE \
               --set staging.namespace=$K8S_NAMESPACE \
               --set global.apacheEnvOverride.overrideBundlePath="https://assets-dev-fe.workiz.com/staging-dev" \
+              --set $K8S_NAMESPACE.isCloudEnv=true \
               --debug
       
           
