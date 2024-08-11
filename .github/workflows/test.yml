@@ -108,7 +108,8 @@ jobs:
           --set secretProjectId=workiz-development \
           --set image.registry="gcr.io/workiz-development" \
           --set image.tag=$IMAGE \
-          --set customNodeEnv=staging 
+          --set customNodeEnv=staging \
+          --set suspendCrons=true
   deploy-backend-php:
     needs: create-staging-env
     runs-on: ubuntu-latest
