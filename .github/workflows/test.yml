@@ -166,7 +166,6 @@ jobs:
               --set base.namespace=$K8S_NAMESPACE \
               --set staging.namespace=$K8S_NAMESPACE \
               --set global.apacheEnvOverride.overrideBundlePath="https://assets-dev-fe.workiz.com/staging-dev" \
-              --set $K8S_NAMESPACE.isCloudEnv=true \
               --set $K8S_NAMESPACE.markizBotToken=${MARKIZ_BOT_TOKEN} \
               --debug
       
