@@ -35,7 +35,8 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: slack msg about what going to release
+    - name: slack msg about what going to releas
+      id: slack-msg-about-what-going-to-release
       run: |
         json=$(curl --location --request POST 'https://infra-api.workiz.com/github/get_new_release_pr/' \
         --header 'Content-Type: application/json' \
@@ -66,13 +67,12 @@ jobs:
         $(parse_prs "$backend_prs")
         "
         # Output the message
-        echo "$msg"
-        echo "MESSAGE=$msg" >> $GITHUB_ENV
+        echo "MSG=$msg" >> $GITHUB_OUTPUT
     - name: Send slack msg about what going to release
       uses: ./tmp/workiz-actions/slack-msg
       with:
         CHANNEL: 'nehoramoshe'
-        MESSAGE: ${{ env.MESSAGE }}
+        MESSAGE: ${{ steps.slack-msg-about-what-going-to-release.outputs.MSG }}
         SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
