@@ -28,12 +28,6 @@ jobs:
     name: build bundle.js for staging-dev
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        repository: Workiz/frontend
-        ref: ${{ github.ref_name }}
-        token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
-        path: ./
     - name: Check out workiz-actions
       uses: actions/checkout@v4
       with:
@@ -41,36 +35,44 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-        fetch-depth: '0'
-    - uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.ALTER_SA_GITHUB_ACTIONS_JSON_KEY }}
-    - name: 'Set up Cloud SDK'
-      uses: google-github-actions/setup-gcloud@v2
-    - name: install correct node version
-      uses: actions/setup-node@v4
-      with:
-        node-version-file: '.nvmrc'
-        cache: 'npm'
-    - name: install npm modules with npm ci
-      run: npm ci
-    - name: use env.js for ci
-      run: mv env-rc.js env.js
-    - name: build asset
-      if: success()
+    - name: slack msg about what going to release
       run: |
-        ASSETS_PATH="$ASSETS_PATH_URL_STAGING/latest" BUILD_NO_CERT=true npm run build_staging
-    - name: copy bundle to latest
-      run: |
-          gsutil -o "GSUtil:parallel_thread_count=100" -o "GSUtil:parallel_process_count=2" -o "GSUtil:num_retries=12" -o "GSUtil:max_retry_delay=20" -m rsync -a public-read -d -r /var/tmp/_assets/js gs://$FRONTEND_ASSETS_BUCKET_PATH/$GITHUB_SHA
-          gsutil -o "GSUtil:parallel_thread_count=100" -o "GSUtil:parallel_process_count=2" -o "GSUtil:num_retries=12" -o "GSUtil:max_retry_delay=20" -m rsync -a public-read -d -r gs://$FRONTEND_ASSETS_BUCKET_PATH/$GITHUB_SHA gs://$FRONTEND_ASSETS_BUCKET_PATH/latest
-    - name: Send failure slack msg 
-      if: failure()  
+        json=$(curl --location --request POST 'https://infra-api.workiz.com/github/get_new_release_pr/' \
+        --header 'Content-Type: application/json' \
+        --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}')
+
+
+        # Utility function to parse PRs
+        parse_prs() {
+          local prs="$1"
+          echo "$prs" | jq -r '.[] | "* [\(.message)](\(.url)) by \(.github_actor)"'
+        }
+
+        # Extract frontend and backend PRs
+        frontend_prs=$(echo $json | jq '.frontend.prs')
+        backend_prs=$(echo $json | jq '.backend.prs')
+
+        # Extract tag values
+        new_tag=$(echo $json | jq -r '.frontend.new_tag')
+        last_tag=$(echo $json | jq -r '.frontend.last_tag')
+
+        # Generate message
+        msg="## Release Notes for ${new_tag}
+
+        ### Frontend Changes (from ${last_tag} to ${new_tag}):
+        $(parse_prs "$frontend_prs")
+
+        ### Backend Changes (from ${last_tag} to ${new_tag}):
+        $(parse_prs "$backend_prs")
+        "
+        # Output the message
+        echo "$msg"
+        echo "MESSAGE=$msg" >> $GITHUB_ENV
+    - name: Send slack msg about what going to release
       uses: ./tmp/workiz-actions/slack-msg
       with:
-        CHANNEL: 'infra-alerts'
-        MESSAGE: 'Failed to build or deploy staging-dev frontend :sob:'
-        SUCCESS: false
+        CHANNEL: 'nehoramoshe'
+        MESSAGE: ${{ env.MESSAGE }}
+        SUCCESS: true
         WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
         LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
-
