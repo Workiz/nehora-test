@@ -72,7 +72,7 @@ jobs:
             --header 'WORKIZ_INFRA_AUTH: TotF2Yr6r1ju9ZHp' \
             --header 'Content-Type: application/json' \
             --data-raw '{
-                "msg" : "$msg",                                                                                                
+                "msg" : "'"$msg"'",                                                                                                
                 "success" : true,
                 "channel" : "nehoramoshe"           
         }'
