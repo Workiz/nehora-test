@@ -45,7 +45,8 @@ jobs:
         # Utility function to parse PRs
         parse_prs() {
           local prs="$1"
-          echo "$prs" | jq -r '.[] | "• <\(.url)|\(.message)>  by @\(.github_actor)  \\n "'
+          echo "$prs" | jq -r '.[] | select(.message | test("Empty commit") | not) | "• <\(.url)|\(.message)>  by @\(.github_actor)  \\n "'
+
         }
 
         # Extract frontend and backend PRs
