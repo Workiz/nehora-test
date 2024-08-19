@@ -35,18 +35,17 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: slack msg about what going to releas
-      id: slack-msg-about-what-going-to-release
-      run: |
-        json=$(curl --location --request POST 'https://infra-api.workiz.com/github/get_new_release_pr/' \
+    - name: releases-msg
+      id: releases-msg
+      run : |
+        json=$(curl --location --request POST 'https://infra-api.workiz.com/github/set_last_release_pr/' \
         --header 'Content-Type: application/json' \
-        --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}')
-
-
+        --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}' \
+        --data-raw '{ "github_token" : ${{ secrets.GH_TOKEN_MARKIZ_BOT }} }' )
         # Utility function to parse PRs
         parse_prs() {
           local prs="$1"
-          echo "$prs" | jq -r '.[] | "* [\(.message)](\(.url)) by \(.github_actor)"'
+          echo "$prs" | jq -r '.[] | "• <\(.url)|\(.message)>  by @\(.github_actor)  \\n "'
         }
 
         # Extract frontend and backend PRs
@@ -58,21 +57,50 @@ jobs:
         last_tag=$(echo $json | jq -r '.frontend.last_tag')
 
         # Generate message
-        msg="## Release Notes for ${new_tag}
-
-        ### Frontend Changes (from ${last_tag} to ${new_tag}):
-        $(parse_prs "$frontend_prs")
-
-        ### Backend Changes (from ${last_tag} to ${new_tag}):
-        $(parse_prs "$backend_prs")
-        "
-        # Output the message
-        echo $msg
+        msg=$(echo -e ":react: *frontend* \n *Release candidate* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$frontend_prs")\n :php: *backend* \n *Release candidate* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$backend_prs")")
+        payload=$(jq -n --arg msg "$msg" --arg channel "nehoramoshe" '{
+          "msg": $msg,
+          "success": true,
+          "channel": $channel,
+          "workiz_logo" : false,
+          "links" : [{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]
+        }')
+        # Send the message to Slack
         curl --location --request POST 'https://infra-api.workiz.com/slack/send_slack_msg/' \
-            --header 'WORKIZ_INFRA_AUTH: TotF2Yr6r1ju9ZHp' \
+            --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}' \
             --header 'Content-Type: application/json' \
-            --data-raw '{
-                "msg" : "'"$msg"'",                                                                                                
-                "success" : true,
-                "channel" : "nehoramoshe"           
-        }'
+            --data-raw "$payload"
+    - name: send msg about 
+      run: | 
+        json=$(curl --location --request POST 'https://infra-api.workiz.com/github/set_new_release_pr/' \
+        --header 'Content-Type: application/json' \
+        --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}' \
+        --data-raw '{ "github_token" : ${{ secrets.GH_TOKEN_MARKIZ_BOT }} }' )
+        # Utility function to parse PRs
+        parse_prs() {
+          local prs="$1"
+          echo "$prs" | jq -r '.[] | "• <\(.url)|\(.message)>  by @\(.github_actor)  \\n "'
+        }
+
+        # Extract frontend and backend PRs
+        frontend_prs=$(echo $json | jq '.frontend.prs')
+        backend_prs=$(echo $json | jq '.backend.prs')
+
+        # Extract tag values
+        new_tag=$(echo $json | jq -r '.frontend.new_tag')
+        last_tag=$(echo $json | jq -r '.frontend.last_tag')
+
+        # Generate message
+        msg=$(echo -e ":react: *frontend* \n *Release candidate* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$frontend_prs")\n :php: *backend* \n *Release candidate* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$backend_prs")")
+        payload=$(jq -n --arg msg "$msg" --arg channel "nehoramoshe" '{
+          "msg": $msg,
+          "success": true,
+          "channel": $channel,
+          "workiz_logo" : false,
+          "links" : [{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]
+        }')
+        # Send the message to Slack
+        curl --location --request POST 'https://infra-api.workiz.com/slack/send_slack_msg/' \
+            --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}' \
+            --header 'Content-Type: application/json' \
+            --data-raw "$payload"
