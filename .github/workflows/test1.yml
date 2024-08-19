@@ -63,7 +63,7 @@ jobs:
         if [[ $new_tag == *"hf"* ]]; then
           msg=$(echo -e "*we released a hotfix to production :fire: :fire: :fire:* \n *Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :+1: \n :react: *frontend* \n *Release* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$frontend_prs")\n :php: *backend* \n *Release* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$backend_prs")")
         fi
-        payload=$(jq -n --arg msg "$msg" --arg channel "nehoramoshe" '{
+        payload=$(jq -n --arg msg "$msg" --arg channel "Mark Davydov" '{
           "msg": $msg,
           "success": true,
           "channel": $channel,
@@ -97,7 +97,7 @@ jobs:
 
         # Generate message
         msg=$(echo -e ":react: *frontend* \n *Release candidate* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$frontend_prs")\n :php: *backend* \n *Release candidate* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$backend_prs")")
-        payload=$(jq -n --arg msg "$msg" --arg channel "nehoramoshe" '{
+        payload=$(jq -n --arg msg "$msg" --arg channel "Mark Davydov" '{
           "msg": $msg,
           "success": true,
           "channel": $channel,
