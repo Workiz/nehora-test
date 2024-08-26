@@ -33,31 +33,25 @@ env:
   NPM_READONLY_TOKEN: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
 
 jobs: 
-  create-rc-branches-and-tags:
-    name: create rc branches and tags
-    runs-on: ubuntu-latest
-    outputs:
-      branch: ${{ steps.create-rc-branches-and-tags.outputs.branch }}
-      rc_tag: ${{ steps.create-rc-branches-and-tags.outputs.rc_tag }}
-    steps:
-    - name: make outputs
-      id: create-rc-branches-and-tags
-      run: |
-        echo ::set-output name=branch::DEVOPS-1329-backend-move-rc-to-staging-cluster
-        echo ::set-output name=rc_tag::tag123
-
-  deploy-helm-rc-chart:
-    needs: [create-rc-branches-and-tags]
-    name: build and deploy rc
-    uses: ./.github/workflows/deploy-helm-rc.yaml
-    secrets: inherit
-    with: 
-      frontend_branch: workiz.com 
   send-slack-msg:
-    needs: [deploy-helm-rc-chart]
     name: send slack msg
+    outputs:
+      msg: ${{ steps.releases-msg.outputs.msg }}
     runs-on: ubuntu-latest
-    steps:
+    steps: 
+    - name: Checkout backend
+      uses: actions/checkout@v4 
+      with:
+        repository: Workiz/backend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+    - name: Checkout frontend
+      uses: actions/checkout@v4
+      with:
+        repository: Workiz/frontend
+        ref: workiz.com
+        token: ${{ secrets.GH_TOKEN_REPOS }}
+        path: ./tmp/frontend
     - name: Checkout shared actions
       uses: actions/checkout@v4
       with:
@@ -65,27 +59,69 @@ jobs:
         ref: workiz.com
         token: ${{ secrets.GH_TOKEN_MARKIZ_BOT }}
         path: ./tmp/workiz-actions
-    - name: Send slack msg 
-      uses: ./tmp/workiz-actions/slack-msg
-      with:
-        CHANNEL: 'nehoramoshe'
-        MESSAGE: 'RC got updated and automated tests are running :charmander_dancing: \n'
-        SUCCESS: true
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]'
-    - name: infra-api  
+    - name: releases-msg
+      id: releases-msg
+      run : |
+        json=$(curl --location --request POST 'https://infra-api.workiz.com/github/set_last_release_pr/' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{ "github_token" : "${{ secrets.GH_TOKEN_MARKIZ_BOT }}" , "hotfix" : "true"}' )
+        echo $json
+        # Utility function to parse PRs
+        parse_prs() {
+          local prs="$1"
+          echo "$prs" | jq -r '.[] | select(.message | test("Empty commit") | not) | "• <\(.url)|\(.message)>  by @\(.github_actor)  \\n "'
+
+        }
+
+        # Extract frontend and backend PRs
+        frontend_prs=$(echo $json | jq '.frontend.prs')
+        backend_prs=$(echo $json | jq '.backend.prs')
+
+        # Extract tag values
+        new_tag=$(echo $json | jq -r '.frontend.new_tag')
+        last_tag=$(echo $json | jq -r '.frontend.last_tag')
+
+        # Generate message
+        msg=$(echo -e "*we released a new version to production* \n *Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :+1: \n :react: *frontend* \n *Release* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$frontend_prs")\n :php: *backend* \n *Release* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$backend_prs")")
+        # if new_tag has hf in his name add abc to the message
+        if [[ $new_tag == *"hf"* ]]; then
+          msg=$(echo -e "*we released a hotfix to production :fire: :fire: :fire:* \n *Developers that got mentioned, please check your changes and thumbs-up on this message, so we know that you have checked your code change* :+1: \n :react: *frontend* \n *Release* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$frontend_prs")\n :php: *backend* \n *Release* (from ${last_tag} to ${new_tag}): \n$(parse_prs "$backend_prs")")
+        fi
+        payload=$(jq -n --arg msg "$msg" --arg channel "nehoramoshe" '{
+          "msg": $msg,
+          "success": true,
+          "channel": $channel,
+          "workiz_logo" : false,
+          "links" : [{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]
+        }')
+        # Send the message to Slack
+        curl --location --request POST 'https://infra-api.workiz.com/slack/send_slack_msg/' \
+            --header 'WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}' \
+            --header 'Content-Type: application/json' \
+            --data-raw "$payload" || echo -e "\e[1;31m slack msg failed"
+        git config --global --add safe.directory /github/workspace
+        git fetch --tags
+        LAST_TAG=$(git tag | sort -V | grep -i "^v[0-9]\..*" | tail -1)
+        json=$(jq -n \
+                --arg tag_name "$LAST_TAG" \
+                --arg body "$msg" \
+                --arg name "$LAST_TAG" \
+                --arg make_latest "true" \
+                '{tag_name: $tag_name, body: $body, name: $name , make_latest: $make_latest}'
+                )
+        git_refs_response=$(
+            curl -s -X POST https://api.github.com/repos/Workiz/backend/releases \
+            -H "Authorization: token ${{ secrets.GH_TOKEN_REPOS }}" \
+            -d  "$json"
+        )
+        echo "::debug::${git_refs_response}"
+    - name: infra-api success
+      if: ${{ startsWith(github.ref_name, 'rc') }}
       run: | 
-        echo "curl success to axiom"
-    - name: failed-slack-msg
-      if: ${{ needs.deploy-helm-rc-chart.result == 'failure' }}
-      uses: ./tmp/workiz-actions/slack-msg
-      with:
-        CHANNEL: 'nehoramoshe'
-        MESSAGE: 'RC failed to update,helm upgrade failed. :sob:'
-        SUCCESS: false
-        WORKIZ_INFRA_AUTH: ${{ secrets.WORKIZ_INFRA_AUTH }}
-        LINKS: '[{"name" :"github-action","link": "https://github.com/Workiz/backend/actions/runs/${{github.run_id}}"}]' 
-    - name: infra-api failed
-      if: ${{ needs.deploy-helm-rc-chart.result == 'failure' }}
-      run: | 
-        echo "curl to axiom"
+        curl --location --request POST 'https://infra-api.workiz.com/releaseProgress/update_job_status/' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "job_name" : "prod_deploy",
+            "status" : "success"
+            }' || echo -e "\e[1;31m infra-api sent failed" 
+  
