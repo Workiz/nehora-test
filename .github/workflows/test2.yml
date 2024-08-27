@@ -64,7 +64,7 @@ jobs:
       run : |
         json=$(curl --location --request POST 'https://infra-api.workiz.com/github/set_last_release_pr/' \
         --header 'Content-Type: application/json' \
-        --data-raw '{ "github_token" : "${{ secrets.GH_TOKEN_MARKIZ_BOT }}" , "hotfix" : "true"}' )
+        --data-raw '{ "github_token" : "${{ secrets.GH_TOKEN_MARKIZ_BOT }}"}' )
         echo $json
         # Utility function to parse PRs
         parse_prs() {
