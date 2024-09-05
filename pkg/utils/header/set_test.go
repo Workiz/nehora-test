@@ -5,8 +5,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/tomMoulard/htransformation/pkg/tests/assert"
-	"github.com/tomMoulard/htransformation/pkg/utils/header"
+	"github.com/Workiz/nehora-test/pkg/tests/assert"
+	"github.com/Workiz/nehora-test/pkg/utils/header"
 )
 
 func TestSet(t *testing.T) {

@@ -1,3 +1,3 @@
-module github.com/tomMoulard/htransformation
+module github.com/Workiz/nehora
 
 go 1.22.2

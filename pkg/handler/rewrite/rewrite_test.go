@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/tomMoulard/htransformation/pkg/handler/rewrite"
-	"github.com/tomMoulard/htransformation/pkg/tests/assert"
-	"github.com/tomMoulard/htransformation/pkg/tests/require"
-	"github.com/tomMoulard/htransformation/pkg/types"
+	"github.com/Workiz/nehora-test/pkg/handler/rewrite"
+	"github.com/Workiz/nehora-test/pkg/tests/assert"
+	"github.com/Workiz/nehora-test/pkg/tests/require"
+	"github.com/Workiz/nehora-test/pkg/types"
 )
 
 func TestRewriteHandler(t *testing.T) {

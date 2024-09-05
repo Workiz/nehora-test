@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/tomMoulard/htransformation/pkg/types"
-	"github.com/tomMoulard/htransformation/pkg/utils/header"
+	"github.com/Workiz/nehora-test/pkg/types"
+	"github.com/Workiz/nehora-test/pkg/utils/header"
 )
 
 type Rewrite struct {
