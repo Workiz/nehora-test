@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Workiz/nehora-test/pkg/types"
+	"github.com/tomMoulard/htransformation/pkg/types"
 )
 
 type Join struct {

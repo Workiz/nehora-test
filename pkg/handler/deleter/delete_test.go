@@ -6,10 +6,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Workiz/nehora-test/pkg/handler/deleter"
-	"github.com/Workiz/nehora-test/pkg/tests/assert"
-	"github.com/Workiz/nehora-test/pkg/tests/require"
-	"github.com/Workiz/nehora-test/pkg/types"
+	"github.com/tomMoulard/htransformation/pkg/handler/deleter"
+	"github.com/tomMoulard/htransformation/pkg/tests/assert"
+	"github.com/tomMoulard/htransformation/pkg/tests/require"
+	"github.com/tomMoulard/htransformation/pkg/types"
 )
 
 func TestDeleteHandler(t *testing.T) {

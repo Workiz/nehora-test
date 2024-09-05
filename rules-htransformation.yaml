@@ -2,9 +2,9 @@
 
 http:
   middlewares:
-    nehora:
+    htransformation:
       plugin:
-        nehora:
+        htransformation:
           Rules:
             - Rule:
               Name: 'Header transformation'

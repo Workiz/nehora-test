@@ -1,16 +1,16 @@
-package nehora
+package htransformation
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 
-	"github.com/Workiz/nehora-test/pkg/handler/deleter"
-	"github.com/Workiz/nehora-test/pkg/handler/join"
-	"github.com/Workiz/nehora-test/pkg/handler/rename"
-	"github.com/Workiz/nehora-test/pkg/handler/rewrite"
-	"github.com/Workiz/nehora-test/pkg/handler/set"
-	"github.com/Workiz/nehora-test/pkg/types"
+	"github.com/tomMoulard/htransformation/pkg/handler/deleter"
+	"github.com/tomMoulard/htransformation/pkg/handler/join"
+	"github.com/tomMoulard/htransformation/pkg/handler/rename"
+	"github.com/tomMoulard/htransformation/pkg/handler/rewrite"
+	"github.com/tomMoulard/htransformation/pkg/handler/set"
+	"github.com/tomMoulard/htransformation/pkg/types"
 )
 
 // HeadersTransformation holds the necessary components of a Traefik plugin.

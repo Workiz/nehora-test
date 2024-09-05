@@ -6,16 +6,16 @@ services:
     command:
       - --api.insecure=true
       - --providers.docker
-      - --providers.file.filename=/rules-nehora.yaml
+      - --providers.file.filename=/rules-htransformation.yaml
       - --log.level=DEBUG
-      - --experimental.localPlugins.nehora.moduleName=github.com/Workiz/nehora-test
+      - --experimental.localPlugins.htransformation.moduleName=github.com/tomMoulard/htransformation
     ports:
       - 80:80
       - 8080:8080
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./rules-nehora.yaml:/rules-nehora.yaml
-      - .:/plugins-local/src/github.com/Workiz/nehora-test/
+      - ./rules-htransformation.yaml:/rules-htransformation.yaml
+      - .:/plugins-local/src/github.com/tomMoulard/htransformation/
     tty: true
 
   whoami:
@@ -23,4 +23,4 @@ services:
     command: -name whoami
     labels:
       traefik.http.routers.whoami.rule: Host(`whoami.localhost`)
-      traefik.http.routers.whoami.middlewares: nehora@file
+      traefik.http.routers.whoami.middlewares: htransformation@file
