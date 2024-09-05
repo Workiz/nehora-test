@@ -1,215 +1,270 @@
-# Header transformation plugin for traefik
+This repository includes an example plugin, `demo`, for you to use as a reference for developing your own plugins.
 
-This plugin allows changing on the fly, the header value of a request.
+[![Build Status](https://github.com/traefik/plugindemo/workflows/Main/badge.svg?branch=master)](https://github.com/traefik/plugindemo/actions)
 
-## How to dev
+The existing plugins can be browsed into the [Plugin Catalog](https://plugins.traefik.io).
 
-```bash
-$ docker compose up
-```
+# Developing a Traefik plugin
 
-## How to use
+[Traefik](https://traefik.io) plugins are developed using the [Go language](https://golang.org).
 
-To choose a Rule you have to fill the `Type` field with one of the following:
+A [Traefik](https://traefik.io) middleware plugin is just a [Go package](https://golang.org/ref/spec#Packages) that provides an `http.Handler` to perform specific processing of requests and responses.
 
-- 'Del'             : to Delete a header
-- 'Join'            : to Join values on a header
-- 'Rename'          : to rename a header
-- 'RewriteValueRule': to rewrite header values
-- 'Set'             : to Set a header
+Rather than being pre-compiled and linked, however, plugins are executed on the fly by [Yaegi](https://github.com/traefik/yaegi), an embedded Go interpreter.
 
-Each Rule can be named with the `Name` field.
+## Usage
 
-Each Rule can also be configured to change headers on the request or the
-response by using the `SetOnResponse` configuration.
-If `SetOnResponse` is set to `true`, the header will be changed on the response.
-Otherwise, it will be changed on the request.
-Its default value is `false`.
+For a plugin to be active for a given Traefik instance, it must be declared in the static configuration.
 
-### Rename
+Plugins are parsed and loaded exclusively during startup, which allows Traefik to check the integrity of the code and catch errors early on.
+If an error occurs during loading, the plugin is disabled.
 
-A Rule Rename needs two arguments.
+For security reasons, it is not possible to start a new plugin or modify an existing one while Traefik is running.
 
-- `Header`, the regex of the header you want to replace
-- `Value`, the new header
+Once loaded, middleware plugins behave exactly like statically compiled middlewares.
+Their instantiation and behavior are driven by the dynamic configuration.
 
-```yaml
-# Example Rename
-- Rule:
-      Name: 'Header rename'
-      Header: 'Cache-Control'
-      Value: 'NewHeader'
-      Type: 'Rename'
-```
+Plugin dependencies must be [vendored](https://golang.org/ref/mod#vendoring) for each plugin.
+Vendored packages should be included in the plugin's GitHub repository. ([Go modules](https://blog.golang.org/using-go-modules) are not supported.)
+
+### Configuration
+
+For each plugin, the Traefik static configuration must define the module name (as is usual for Go packages).
+
+The following declaration (given here in YAML) defines a plugin:
 
 ```yaml
-# Old header:
-Cache-Control: gzip, deflate
+# Static configuration
 
-# New header:
-NewHeader: gzip, deflate
+experimental:
+  plugins:
+    example:
+      moduleName: github.com/traefik/plugindemo
+      version: v0.2.1
 ```
 
-``` yaml
-- Rule:
-      Name: 'Header Renaming'
-      Header: 'X-Traefik-*'
-      Value: 'X-Traefik-merged'
-      Type: 'Rename'
-```
+Here is an example of a file provider dynamic configuration (given here in YAML), where the interesting part is the `http.middlewares` section:
 
 ```yaml
-# Old header:
-X-Traefik-uuid: 0
-X-Traefik-date: mer. 21 oct. 2020 11:57:39 CEST
-# New header:
-X-Traefik-merged: 0 # A value from old headers
+# Dynamic configuration
+
+http:
+  routers:
+    my-router:
+      rule: host(`demo.localhost`)
+      service: service-foo
+      entryPoints:
+        - web
+      middlewares:
+        - my-plugin
+
+  services:
+   service-foo:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:5000
+  
+  middlewares:
+    my-plugin:
+      plugin:
+        example:
+          headers:
+            Foo: Bar
 ```
 
-### Set
+### Local Mode
 
-A Set rule will either create or replace the header and value (if it already exists)
+Traefik also offers a developer mode that can be used for temporary testing of plugins not hosted on GitHub.
+To use a plugin in local mode, the Traefik static configuration must define the module name (as is usual for Go packages) and a path to a [Go workspace](https://golang.org/doc/gopath_code.html#Workspaces), which can be the local GOPATH or any directory.
 
-A rule Set need 2 arguments
+The plugins must be placed in `./plugins-local` directory,
+which should be in the working directory of the process running the Traefik binary.
+The source code of the plugin should be organized as follows:
 
-- `Header`, the header you want to create
-- `Value`, the value of the new header
-
-```yaml
-# Example 
-- Rule:
-      Name: 'Set Cache-Control'
-      Header: 'Cache-Control'
-      Value: 'Foo'
-      Type: 'Set'
 ```
-
-```yaml
-# New header:
-Cache-Control: Foo
-```
-
-### Delete
-
-A rule Delete need one arguments
-
-- `Header`, the header you want to delete
-
-```yaml
-# Example Del
-- Rule:
-      Name: 'Delete Cache-Control'
-      Header: 'Cache-Control'
-      Type: 'Del'
-```
-
-
-### Join
-
-A Join rule will concatenate the values of the existing header with the new one. If the header doesn't exist, it'll do nothing
-
-It needs 3 arguments
-- `Header`, the header you want to join
-- `Values`, a list of values to add to the existing header
-- `Sep`, the separator you want to use
-
-```yaml
-# Example Join
-- Rule:
-      Name: 'Header join'
-      Header: 'Cache-Control'
-      Sep: ','
-      Values:
-        - 'Foo'
-        - 'Bar'
-      Type: 'Join'
+./plugins-local/
+    └── src
+        └── github.com
+            └── traefik
+                └── plugindemo
+                    ├── demo.go
+                    ├── demo_test.go
+                    ├── go.mod
+                    ├── LICENSE
+                    ├── Makefile
+                    └── readme.md
 ```
 
 ```yaml
-# Old header:
-Cache-Control: gzip, deflate
+# Static configuration
 
-# Joined header:
-Cache-Control: gzip, deflate,Foo,Bar
+experimental:
+  localPlugins:
+    example:
+      moduleName: github.com/traefik/plugindemo
 ```
 
-You can reuse other header values in `Value` or one of the `Values` by setting an additional argument `HeaderPrefix`.
-Example:
+(In the above example, the `plugindemo` plugin will be loaded from the path `./plugins-local/src/github.com/traefik/plugindemo`.)
 
 ```yaml
-# Example Usage
-- Rule:
-  Name: 'Header set'
-  Header: 'X-Forwarded-For'
-  HeaderPrefix: "^"
-  Sep: ','
-  Values:
-      - 'Foo'
-      - '^CF-Connecting-IP'
-  Type: 'Join'
+# Dynamic configuration
+
+http:
+  routers:
+    my-router:
+      rule: host(`demo.localhost`)
+      service: service-foo
+      entryPoints:
+        - web
+      middlewares:
+        - my-plugin
+
+  services:
+   service-foo:
+      loadBalancer:
+        servers:
+          - url: http://127.0.0.1:5000
+  
+  middlewares:
+    my-plugin:
+      plugin:
+        example:
+          headers:
+            Foo: Bar
 ```
+
+## Defining a Plugin
+
+A plugin package must define the following exported Go objects:
+
+- A type `type Config struct { ... }`. The struct fields are arbitrary.
+- A function `func CreateConfig() *Config`.
+- A function `func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error)`.
+
+```go
+// Package example a example plugin.
+package example
+
+import (
+	"context"
+	"net/http"
+)
+
+// Config the plugin configuration.
+type Config struct {
+	// ...
+}
+
+// CreateConfig creates the default plugin configuration.
+func CreateConfig() *Config {
+	return &Config{
+		// ...
+	}
+}
+
+// Example a plugin.
+type Example struct {
+	next     http.Handler
+	name     string
+	// ...
+}
+
+// New created a new plugin.
+func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
+	// ...
+	return &Example{
+		// ...
+	}, nil
+}
+
+func (e *Example) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	// ...
+	e.next.ServeHTTP(rw, req)
+}
+```
+
+## Logs
+
+Currently, the only way to send logs to Traefik is to use `os.Stdout.WriteString("...")` or `os.Stderr.WriteString("...")`.
+
+In the future, we will try to provide something better and based on levels.
+
+## Plugins Catalog
+
+Traefik plugins are stored and hosted as public GitHub repositories.
+
+Every 30 minutes, the Plugins Catalog online service polls Github to find plugins and add them to its catalog.
+
+### Prerequisites
+
+To be recognized by Plugins Catalog, your repository must meet the following criteria:
+
+- The `traefik-plugin` topic must be set.
+- The `.traefik.yml` manifest must exist, and be filled with valid contents.
+
+If your repository fails to meet either of these prerequisites, Plugins Catalog will not see it.
+
+### Manifest
+
+A manifest is also mandatory, and it should be named `.traefik.yml` and stored at the root of your project.
+
+This YAML file provides Plugins Catalog with information about your plugin, such as a description, a full name, and so on.
+
+Here is an example of a typical `.traefik.yml`file:
 
 ```yaml
-# Old header:
-X-Forwarded-For: 1.1.1.1
-CF-Connecting-IP: 2.2.2.2
-# New headers:
-X-Forwarded-For: 1.1.1.1,Foo,2.2.2.2
-CF-Connecting-IP: 2.2.2.2
+# The name of your plugin as displayed in the Plugins Catalog web UI.
+displayName: Name of your plugin
+
+# For now, `middleware` is the only type available.
+type: middleware
+
+# The import path of your plugin.
+import: github.com/username/my-plugin
+
+# A brief description of what your plugin is doing.
+summary: Description of what my plugin is doing
+
+# Medias associated to the plugin (optional)
+iconPath: foo/icon.png
+bannerPath: foo/banner.png
+
+# Configuration data for your plugin.
+# This is mandatory,
+# and Plugins Catalog will try to execute the plugin with the data you provide as part of its startup validity tests.
+testData:
+  Headers:
+    Foo: Bar
 ```
 
-### RewriteValue Rule
+Properties include:
 
-A RewriteValue Rule will replace the values of the headers identified by a matching regex with the provided value.
+- `displayName` (required): The name of your plugin as displayed in the Plugins Catalog web UI.
+- `type` (required): For now, `middleware` is the only type available.
+- `import` (required): The import path of your plugin.
+- `summary` (required): A brief description of what your plugin is doing.
+- `testData` (required): Configuration data for your plugin. This is mandatory, and Plugins Catalog will try to execute the plugin with the data you provide as part of its startup validity tests.
+- `iconPath` (optional): A local path in the repository to the icon of the project.
+- `bannerPath` (optional): A local path in the repository to the image that will be used when you will share your plugin page in social medias.
 
-It needs 2 arguments
+There should also be a `go.mod` file at the root of your project. Plugins Catalog will use this file to validate the name of the project.
 
-- `Header`, the header or regex identifying the headers you want to change
-- `Value`, the new value of the headers
+### Tags and Dependencies
 
-```yaml
-# Example RewriteValueRule
-- Rule:
-      Name: 'Header rewriteValue'
-      Header: 'Foo'
-      Value: 'X-(.*)'
-      ValueReplace: 'Y-$1'
-      Type: 'RewriteValueRule'
-```
+Plugins Catalog gets your sources from a Go module proxy, so your plugins need to be versioned with a git tag.
 
-```yaml
-# Old header:
-Foo: X-Test
+Last but not least, if your plugin middleware has Go package dependencies, you need to vendor them and add them to your GitHub repository.
 
-# Modified header:
-Foo: Y-Test
-```
+If something goes wrong with the integration of your plugin, Plugins Catalog will create an issue inside your Github repository and will stop trying to add your repo until you close the issue.
 
-### Careful
+## Troubleshooting
 
-The rules will be evaluated in the order of definition
+If Plugins Catalog fails to recognize your plugin, you will need to make one or more changes to your GitHub repository.
 
-```yaml
-#Example
-- Rule:
-  Name: 'Header addition'
-  Header: 'X-Custom-2'
-  Value: 'True'
-  Type: 'Set'
-- Rule:
-  Name: 'Header deletion'
-  Header: 'X-Custom-2'
-  Type: 'Del'
-- Rule:
-  Name: 'Header join'
-  Header: 'X-Custom-2'
-  Value: 'False'
-  Type: 'Set'
-```
-Will set the header `X-Custom-2` to 'True', then delete it and set it again but with `False`
+In order for your plugin to be successfully imported by Plugins Catalog, consult this checklist:
 
-# Authors
-
-| Tom Moulard | Clément David | Martin Huvelle | Alexandre Bossut-Lasry |
-|-------------|---------------|----------------|------------------------|
-|[![](img/gopher-tom_moulard.png)](https://tom.moulard.org)|[![](img/gopher-clement_david.png)](https://github.com/cledavid)|[![](img/gopher-martin_huvelle.png)](https://github.com/nitra-mfs)|[![](img/gopher-alexandre_bossut-lasry.png)](https://www.linkedin.com/in/alexandre-bossut-lasry/)|
+- The `traefik-plugin` topic must be set on your repository.
+- There must be a `.traefik.yml` file at the root of your project describing your plugin, and it must have a valid `testData` property for testing purposes.
+- There must be a valid `go.mod` file at the root of your project.
+- Your plugin must be versioned with a git tag.
+- If you have package dependencies, they must be vendored and added to your GitHub repository.

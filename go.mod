@@ -1,3 +1,3 @@
-module github.com/tomMoulard/htransformation
+module github.com/traefik/plugindemo
 
-go 1.22.2
+go 1.19
