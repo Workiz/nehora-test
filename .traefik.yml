@@ -1,0 +1,8 @@
+displayName: 'Nehora test'
+type: provider
+
+import: github.com/Workiz/nehora-test
+
+summary: 'Nehora test'
+
+testData: {}
