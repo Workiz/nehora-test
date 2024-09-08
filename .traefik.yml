@@ -1,8 +1,8 @@
-displayName: 'Nehora test'
+displayName: 'NehoraTest'
 type: provider
 
 import: github.com/Workiz/nehora-test
 
-summary: 'Nehora test'
+summary: 'NehoraTest'
 
 testData: {}
