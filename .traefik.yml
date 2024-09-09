@@ -1,8 +1,8 @@
-displayName: 'NehoraTest'
+displayName: 'traefikPlugin'
 type: provider
 
-import: github.com/Workiz/nehora-test
+import: github.com/Workiz/traefikPlugin
 
-summary: 'NehoraTest'
+summary: 'traefikPlugin'
 
 testData: {}
