@@ -1,8 +1,11 @@
 displayName: 'traefikPlugin'
-type: provider
+type: middleware
 
 import: github.com/Workiz/traefikPlugin
 
 summary: 'traefikPlugin'
 
-testData: {}
+testData: 
+  Headers:
+    X-Demo: test
+    X-URL: '{{URL}}'
